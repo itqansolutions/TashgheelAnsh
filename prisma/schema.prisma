@@ -1,0 +1,786 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// ENUMS
+// ----------------------------------------------------
+
+enum ItemType {
+  RAW_MATERIAL
+  SEMI_FINISHED
+  FINISHED_PRODUCT
+  SERVICE
+  OTHER
+}
+
+enum BatchSourceType {
+  PURCHASE
+  MANUFACTURING
+  OPENING_BALANCE
+  RETURN
+  ADJUSTMENT
+}
+
+enum InventoryTransactionType {
+  PURCHASE_RECEIPT
+  SALE
+  SALE_RETURN
+  MANUFACTURING_CONSUMPTION
+  MANUFACTURING_OUTPUT
+  TRANSFER_IN
+  TRANSFER_OUT
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+  OPENING_BALANCE
+}
+
+enum PurchaseStatus {
+  DRAFT
+  OPEN
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+enum ManufacturingStatus {
+  DRAFT
+  OPEN
+  IN_PROGRESS
+  READY_TO_CLOSE
+  CLOSED
+  CANCELLED
+}
+
+enum CostAllocationMethod {
+  MANUAL_PERCENTAGE
+  BY_QUANTITY
+  BY_VALUE
+  CUSTOM
+}
+
+enum ManufacturingExpenseType {
+  GENERAL_OPERATIONAL
+  FACTORY_PAYABLE
+}
+
+enum SalesStatus {
+  DRAFT
+  OPEN
+  PARTIALLY_PAID
+  PAID
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT
+  BANK_TRANSFER
+  PARTIAL
+}
+
+enum ExpenseClassification {
+  GENERAL
+  MANUFACTURING
+  FACTORY
+  PURCHASE_RELATED
+  SALES_RELATED
+}
+
+enum CashAccountType {
+  CASH_DRAWER
+  BANK_ACCOUNT
+  PETTY_CASH
+}
+
+enum FinancialTransactionType {
+  PAYMENT
+  RECEIPT
+}
+
+enum LedgerReferenceType {
+  PURCHASE_INVOICE
+  SALES_INVOICE
+  MANUFACTURING_CHARGE
+  PAYMENT
+  RECEIPT
+  RETURN
+  ADJUSTMENT
+}
+
+enum DocumentSequenceType {
+  PURCHASE
+  SALE
+  MANUFACTURING
+  PAYMENT
+  RECEIPT
+  EXPENSE
+  BATCH
+  INVENTORY_TX
+  LEDGER
+}
+
+// ----------------------------------------------------
+// 1. SECURITY & ACCESS CONTROL
+// ----------------------------------------------------
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  userRoles               UserRole[]
+  auditLogs               AuditLog[]
+  createdPurchases        PurchaseInvoice[]
+  closedManufacturing     ManufacturingOrder[]
+  createdSales            SalesInvoice[]
+  approvedBelowCostLines  SalesInvoiceLine[]
+  inventoryTransactions   InventoryTransaction[]
+  financialTransactions   FinancialTransaction[]
+  partnerLedgerEntries    PartnerLedgerEntry[]
+  expenses                Expense[]
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  code        String   @unique // ADMIN, MANAGER, ACCOUNTANT, SALES, WAREHOUSE, USER
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userRoles       UserRole[]
+  rolePermissions RolePermission[]
+}
+
+model Permission {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  module      String
+  description String
+  createdAt   DateTime @default(now())
+
+  rolePermissions RolePermission[]
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+}
+
+model RolePermission {
+  id           String   @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  userId        String?
+  action        String
+  entity        String
+  entityId      String
+  previousState Json?
+  newState      Json?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+// ----------------------------------------------------
+// 2. MASTER DATA & PARTNERS
+// ----------------------------------------------------
+
+model BusinessPartner {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  name             String
+  nameAr           String
+  phone            String?
+  mobile           String?
+  email            String?
+  address          String?
+  taxNumber        String?
+  isSupplier       Boolean  @default(false)
+  isCustomer       Boolean  @default(false)
+  isFactory        Boolean  @default(false)
+  creditLimit      Decimal  @default(0.0000) @db.Decimal(18, 4)
+  paymentTermsDays Int      @default(0)
+  openingBalance   Decimal  @default(0.0000) @db.Decimal(18, 4)
+  currentBalance   Decimal  @default(0.0000) @db.Decimal(18, 4)
+  isActive         Boolean  @default(true)
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  purchases             PurchaseInvoice[]
+  manufacturingOrders   ManufacturingOrder[]
+  sales                 SalesInvoice[]
+  ledgerEntries         PartnerLedgerEntry[]
+  financialTransactions FinancialTransaction[]
+  factoryExpenses       ManufacturingExpense[]
+  expenses              Expense[]
+
+  @@index([code])
+  @@index([isSupplier])
+  @@index([isCustomer])
+  @@index([isFactory])
+  @@index([isActive])
+}
+
+model ProductCategory {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  name        String
+  nameAr      String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products Product[]
+
+  @@index([code])
+}
+
+model UnitOfMeasure {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  name      String
+  nameAr    String
+  symbol    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  products Product[]
+
+  @@index([code])
+}
+
+model Product {
+  id                  String   @id @default(cuid())
+  sku                 String   @unique
+  name                String
+  nameAr              String
+  description         String?
+  categoryId          String
+  uomId               String
+  itemType            ItemType
+  defaultSellingPrice Decimal  @default(0.0000) @db.Decimal(18, 4)
+  minSellingPrice     Decimal  @default(0.0000) @db.Decimal(18, 4)
+  referenceCost       Decimal  @default(0.0000) @db.Decimal(18, 4)
+  isActive            Boolean  @default(true)
+  notes               String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  category ProductCategory @relation(fields: [categoryId], references: [id])
+  uom      UnitOfMeasure   @relation(fields: [uomId], references: [id])
+
+  batches               InventoryBatch[]
+  purchaseLines         PurchaseInvoiceLine[]
+  manufacturingInputs   ManufacturingInput[]
+  manufacturingOutputs  ManufacturingOutput[]
+  saleLines             SalesInvoiceLine[]
+  inventoryTransactions InventoryTransaction[]
+
+  @@index([sku])
+  @@index([categoryId])
+  @@index([itemType])
+  @@index([isActive])
+}
+
+model Warehouse {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  nameAr    String
+  address   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  batches               InventoryBatch[]
+  inventoryTransactions InventoryTransaction[]
+  purchases             PurchaseInvoice[]
+  manufacturingOrders   ManufacturingOrder[]
+  sales                 SalesInvoice[]
+  manufacturingOutputs  ManufacturingOutput[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+// ----------------------------------------------------
+// 3. INVENTORY & BATCH COSTING
+// ----------------------------------------------------
+
+model InventoryBatch {
+  id                   String          @id @default(cuid())
+  batchNumber          String          @unique
+  productId            String
+  warehouseId          String
+  sourceType           BatchSourceType
+  sourceDocumentId     String?
+  sourceDocumentLineId String?
+  initialQuantity      Decimal         @db.Decimal(18, 4)
+  remainingQuantity    Decimal         @db.Decimal(18, 4)
+  unitCost             Decimal         @db.Decimal(18, 4)
+  totalCost            Decimal         @db.Decimal(18, 4)
+  expiryDate           DateTime?
+  notes                String?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+
+  product   Product   @relation(fields: [productId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  inventoryTransactions InventoryTransaction[]
+  manufacturingInputs   ManufacturingInput[]
+  saleLineAllocations   SaleLineBatchAllocation[]
+  purchaseLines         PurchaseInvoiceLine[]
+  manufacturingOutputs  ManufacturingOutput[]
+
+  @@index([batchNumber])
+  @@index([productId])
+  @@index([warehouseId])
+  @@index([remainingQuantity])
+  @@index([sourceType, sourceDocumentId])
+}
+
+model InventoryTransaction {
+  id                    String                   @id @default(cuid())
+  transactionNumber     String                   @unique
+  productId             String
+  batchId               String?
+  warehouseId           String
+  quantity              Decimal                  @db.Decimal(18, 4) // Signed
+  unitCost              Decimal                  @db.Decimal(18, 4)
+  totalCost             Decimal                  @db.Decimal(18, 4)
+  transactionType       InventoryTransactionType
+  referenceDocumentType String
+  referenceDocumentId   String
+  referenceLineId       String?
+  notes                 String?
+  userId                String?
+  createdAt             DateTime                 @default(now())
+
+  product   Product         @relation(fields: [productId], references: [id])
+  batch     InventoryBatch? @relation(fields: [batchId], references: [id])
+  warehouse Warehouse       @relation(fields: [warehouseId], references: [id])
+  user      User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([transactionNumber])
+  @@index([productId])
+  @@index([batchId])
+  @@index([warehouseId])
+  @@index([transactionType])
+  @@index([referenceDocumentType, referenceDocumentId])
+  @@index([createdAt])
+}
+
+// ----------------------------------------------------
+// 4. PURCHASES
+// ----------------------------------------------------
+
+model PurchaseInvoice {
+  id              String         @id @default(cuid())
+  invoiceNumber   String         @unique
+  supplierId      String
+  warehouseId     String
+  invoiceDate     DateTime       @db.Date
+  dueDate         DateTime?      @db.Date
+  paymentTerms    String?
+  status          PurchaseStatus @default(DRAFT)
+  subtotal        Decimal        @default(0.0000) @db.Decimal(18, 4)
+  discountAmount  Decimal        @default(0.0000) @db.Decimal(18, 4)
+  taxAmount       Decimal        @default(0.0000) @db.Decimal(18, 4)
+  totalAmount     Decimal        @default(0.0000) @db.Decimal(18, 4)
+  paidAmount      Decimal        @default(0.0000) @db.Decimal(18, 4)
+  remainingAmount Decimal        @default(0.0000) @db.Decimal(18, 4)
+  notes           String?
+  createdById     String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  supplier  BusinessPartner       @relation(fields: [supplierId], references: [id])
+  warehouse Warehouse             @relation(fields: [warehouseId], references: [id])
+  createdBy User?                 @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  lines     PurchaseInvoiceLine[]
+
+  @@index([invoiceNumber])
+  @@index([supplierId])
+  @@index([status])
+  @@index([invoiceDate])
+}
+
+model PurchaseInvoiceLine {
+  id                String   @id @default(cuid())
+  purchaseInvoiceId String
+  productId         String
+  quantity          Decimal  @db.Decimal(18, 4)
+  unitCost          Decimal  @db.Decimal(18, 4)
+  discountAmount    Decimal  @default(0.0000) @db.Decimal(18, 4)
+  taxRate           Decimal  @default(0.00) @db.Decimal(5, 2)
+  taxAmount         Decimal  @default(0.0000) @db.Decimal(18, 4)
+  lineTotal         Decimal  @db.Decimal(18, 4)
+  batchId           String?
+  createdAt         DateTime @default(now())
+
+  purchaseInvoice PurchaseInvoice @relation(fields: [purchaseInvoiceId], references: [id], onDelete: Cascade)
+  product         Product         @relation(fields: [productId], references: [id])
+  batch           InventoryBatch? @relation(fields: [batchId], references: [id])
+
+  @@index([purchaseInvoiceId])
+  @@index([productId])
+  @@index([batchId])
+}
+
+// ----------------------------------------------------
+// 5. OUTSOURCED MANUFACTURING
+// ----------------------------------------------------
+
+model ManufacturingOrder {
+  id                     String               @id @default(cuid())
+  orderNumber            String               @unique
+  factoryId              String
+  warehouseId            String
+  startDate              DateTime             @db.Date
+  expectedCompletionDate DateTime?            @db.Date
+  actualCompletionDate   DateTime?            @db.Date
+  status                 ManufacturingStatus  @default(DRAFT)
+  totalMaterialCost      Decimal              @default(0.0000) @db.Decimal(18, 4)
+  totalExpenseCost       Decimal              @default(0.0000) @db.Decimal(18, 4)
+  totalFactoryCost       Decimal              @default(0.0000) @db.Decimal(18, 4)
+  totalManufacturingCost Decimal              @default(0.0000) @db.Decimal(18, 4)
+  costAllocationMethod   CostAllocationMethod @default(MANUAL_PERCENTAGE)
+  notes                  String?
+  closedById             String?
+  closedAt               DateTime?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  factory   BusinessPartner @relation(fields: [factoryId], references: [id])
+  warehouse Warehouse       @relation(fields: [warehouseId], references: [id])
+  closedBy  User?           @relation(fields: [closedById], references: [id], onDelete: SetNull)
+
+  inputs   ManufacturingInput[]
+  expenses ManufacturingExpense[]
+  outputs  ManufacturingOutput[]
+
+  @@index([orderNumber])
+  @@index([factoryId])
+  @@index([status])
+  @@index([startDate])
+}
+
+model ManufacturingInput {
+  id                   String   @id @default(cuid())
+  manufacturingOrderId String
+  productId            String
+  batchId              String
+  quantity             Decimal  @db.Decimal(18, 4)
+  unitCost             Decimal  @db.Decimal(18, 4)
+  totalCost            Decimal  @db.Decimal(18, 4)
+  notes                String?
+  createdAt            DateTime @default(now())
+
+  manufacturingOrder ManufacturingOrder @relation(fields: [manufacturingOrderId], references: [id], onDelete: Cascade)
+  product            Product            @relation(fields: [productId], references: [id])
+  batch              InventoryBatch     @relation(fields: [batchId], references: [id])
+
+  @@index([manufacturingOrderId])
+  @@index([productId])
+  @@index([batchId])
+}
+
+model ManufacturingExpense {
+  id                   String                   @id @default(cuid())
+  manufacturingOrderId String
+  categoryId           String
+  expenseType          ManufacturingExpenseType
+  amount               Decimal                  @db.Decimal(18, 4)
+  factoryId            String?
+  cashAccountId        String?
+  description          String
+  createdAt            DateTime                 @default(now())
+
+  manufacturingOrder ManufacturingOrder @relation(fields: [manufacturingOrderId], references: [id], onDelete: Cascade)
+  category           ExpenseCategory    @relation(fields: [categoryId], references: [id])
+  factory            BusinessPartner?   @relation(fields: [factoryId], references: [id])
+  cashAccount        CashAccount?       @relation(fields: [cashAccountId], references: [id])
+
+  @@index([manufacturingOrderId])
+  @@index([categoryId])
+  @@index([factoryId])
+  @@index([cashAccountId])
+}
+
+model ManufacturingOutput {
+  id                   String   @id @default(cuid())
+  manufacturingOrderId String
+  productId            String
+  warehouseId          String
+  quantity             Decimal  @db.Decimal(18, 4)
+  allocationPercentage Decimal  @db.Decimal(7, 4) // e.g. 60.0000%
+  allocatedCost        Decimal  @default(0.0000) @db.Decimal(18, 4)
+  calculatedUnitCost   Decimal  @default(0.0000) @db.Decimal(18, 4)
+  batchId              String?
+  notes                String?
+  createdAt            DateTime @default(now())
+
+  manufacturingOrder ManufacturingOrder @relation(fields: [manufacturingOrderId], references: [id], onDelete: Cascade)
+  product            Product            @relation(fields: [productId], references: [id])
+  warehouse          Warehouse          @relation(fields: [warehouseId], references: [id])
+  batch              InventoryBatch?    @relation(fields: [batchId], references: [id])
+
+  @@index([manufacturingOrderId])
+  @@index([productId])
+  @@index([batchId])
+}
+
+// ----------------------------------------------------
+// 6. SALES & MULTI-BATCH ALLOCATION
+// ----------------------------------------------------
+
+model SalesInvoice {
+  id                String        @id @default(cuid())
+  invoiceNumber     String        @unique
+  customerId        String
+  warehouseId       String
+  invoiceDate       DateTime      @db.Date
+  dueDate           DateTime?     @db.Date
+  paymentMethod     PaymentMethod @default(CASH)
+  status            SalesStatus   @default(DRAFT)
+  subtotal          Decimal       @default(0.0000) @db.Decimal(18, 4)
+  discountAmount    Decimal       @default(0.0000) @db.Decimal(18, 4)
+  taxAmount         Decimal       @default(0.0000) @db.Decimal(18, 4)
+  totalAmount       Decimal       @default(0.0000) @db.Decimal(18, 4)
+  paidAmount        Decimal       @default(0.0000) @db.Decimal(18, 4)
+  remainingAmount   Decimal       @default(0.0000) @db.Decimal(18, 4)
+  totalCost         Decimal       @default(0.0000) @db.Decimal(18, 4)
+  grossProfit       Decimal       @default(0.0000) @db.Decimal(18, 4)
+  hasBelowCostLines Boolean       @default(false)
+  notes             String?
+  createdById       String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  customer  BusinessPartner    @relation(fields: [customerId], references: [id])
+  warehouse Warehouse          @relation(fields: [warehouseId], references: [id])
+  createdBy User?              @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  lines     SalesInvoiceLine[]
+
+  @@index([invoiceNumber])
+  @@index([customerId])
+  @@index([status])
+  @@index([invoiceDate])
+}
+
+model SalesInvoiceLine {
+  id                     String   @id @default(cuid())
+  salesInvoiceId         String
+  productId              String
+  quantity               Decimal  @db.Decimal(18, 4)
+  unitPrice              Decimal  @db.Decimal(18, 4)
+  discountAmount         Decimal  @default(0.0000) @db.Decimal(18, 4)
+  netUnitPrice           Decimal  @db.Decimal(18, 4)
+  lineSubtotal           Decimal  @db.Decimal(18, 4)
+  totalCost              Decimal  @default(0.0000) @db.Decimal(18, 4)
+  grossProfit            Decimal  @default(0.0000) @db.Decimal(18, 4)
+  isBelowCost            Boolean  @default(false)
+  belowCostApprovedById  String?
+  createdAt              DateTime @default(now())
+
+  salesInvoice        SalesInvoice              @relation(fields: [salesInvoiceId], references: [id], onDelete: Cascade)
+  product             Product                   @relation(fields: [productId], references: [id])
+  belowCostApprovedBy User?                     @relation(fields: [belowCostApprovedById], references: [id], onDelete: SetNull)
+  batchAllocations    SaleLineBatchAllocation[]
+
+  @@index([salesInvoiceId])
+  @@index([productId])
+  @@index([isBelowCost])
+}
+
+model SaleLineBatchAllocation {
+  id                 String   @id @default(cuid())
+  salesInvoiceLineId String
+  batchId            String
+  quantity           Decimal  @db.Decimal(18, 4)
+  unitCost           Decimal  @db.Decimal(18, 4)
+  totalCost          Decimal  @db.Decimal(18, 4)
+  createdAt          DateTime @default(now())
+
+  salesInvoiceLine SalesInvoiceLine @relation(fields: [salesInvoiceLineId], references: [id], onDelete: Cascade)
+  batch            InventoryBatch   @relation(fields: [batchId], references: [id])
+
+  @@index([salesInvoiceLineId])
+  @@index([batchId])
+}
+
+// ----------------------------------------------------
+// 7. EXPENSES & FINANCIALS
+// ----------------------------------------------------
+
+model ExpenseCategory {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  nameAr      String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  expenses              Expense[]
+  manufacturingExpenses ManufacturingExpense[]
+
+  @@index([code])
+}
+
+model Expense {
+  id                    String                @id @default(cuid())
+  expenseNumber         String                @unique
+  categoryId            String
+  amount                Decimal               @db.Decimal(18, 4)
+  expenseDate           DateTime              @db.Date
+  expenseClassification ExpenseClassification @default(GENERAL)
+  referenceType         String?
+  referenceId           String?
+  partnerId             String?
+  cashAccountId         String?
+  notes                 String?
+  createdById           String?
+  createdAt             DateTime              @default(now())
+
+  category    ExpenseCategory  @relation(fields: [categoryId], references: [id])
+  partner     BusinessPartner? @relation(fields: [partnerId], references: [id])
+  cashAccount CashAccount?     @relation(fields: [cashAccountId], references: [id])
+  createdBy   User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([expenseNumber])
+  @@index([categoryId])
+  @@index([partnerId])
+  @@index([cashAccountId])
+  @@index([expenseDate])
+}
+
+model CashAccount {
+  id          String          @id @default(cuid())
+  code        String          @unique
+  name        String
+  nameAr      String
+  accountType CashAccountType @default(CASH_DRAWER)
+  balance     Decimal         @default(0.0000) @db.Decimal(18, 4)
+  currency    String          @default("EGP")
+  isActive    Boolean         @default(true)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  financialTransactions FinancialTransaction[]
+  manufacturingExpenses ManufacturingExpense[]
+  expenses              Expense[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model FinancialTransaction {
+  id                    String                   @id @default(cuid())
+  transactionNumber     String                   @unique
+  transactionType       FinancialTransactionType
+  partnerId             String
+  cashAccountId         String
+  amount                Decimal                  @db.Decimal(18, 4)
+  paymentMethod         PaymentMethod            @default(CASH)
+  paymentDate           DateTime                 @db.Date
+  referenceDocumentType String?
+  referenceDocumentId   String?
+  notes                 String?
+  createdById           String?
+  createdAt             DateTime                 @default(now())
+
+  partner     BusinessPartner @relation(fields: [partnerId], references: [id])
+  cashAccount CashAccount     @relation(fields: [cashAccountId], references: [id])
+  createdBy   User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([transactionNumber])
+  @@index([partnerId])
+  @@index([cashAccountId])
+  @@index([paymentDate])
+}
+
+// ----------------------------------------------------
+// 8. UNIFIED PARTNER LEDGER
+// ----------------------------------------------------
+
+model PartnerLedgerEntry {
+  id              String              @id @default(cuid())
+  entryNumber     String              @unique
+  partnerId       String
+  entryDate       DateTime            @db.Date
+  referenceType   LedgerReferenceType
+  referenceId     String
+  referenceNumber String
+  debit           Decimal             @default(0.0000) @db.Decimal(18, 4)
+  credit          Decimal             @default(0.0000) @db.Decimal(18, 4)
+  balanceAfter    Decimal             @db.Decimal(18, 4)
+  description     String
+  createdById     String?
+  createdAt       DateTime            @default(now())
+
+  partner   BusinessPartner @relation(fields: [partnerId], references: [id])
+  createdBy User?           @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([entryNumber])
+  @@index([partnerId])
+  @@index([entryDate])
+  @@index([referenceType, referenceId])
+}
+
+// ----------------------------------------------------
+// 9. DOCUMENT SEQUENCES
+// ----------------------------------------------------
+
+model DocumentSequence {
+  id            String               @id @default(cuid())
+  documentType  DocumentSequenceType
+  prefix        String
+  year          Int
+  currentNumber Int                  @default(0)
+  updatedAt     DateTime             @updatedAt
+
+  @@unique([documentType, year])
+  @@index([documentType, year])
+}
