@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { GlobalSearchModal } from "./GlobalSearchModal";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -42,6 +43,22 @@ const navigation: NavItem[] = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+        return;
+      }
+      if ((e.ctrlKey && e.key === "k") || e.key === "/") {
+        e.preventDefault();
+        setSearchModalOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-100/75 flex">
@@ -140,14 +157,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Menu className="h-6 w-6" />
             </button>
-            <div className="relative max-w-xs sm:w-80">
-              <Search className="absolute right-3 top-2.5 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="بحث سريع برقم الفاتورة، الباتش، أو الشريك..."
-                className="w-full pl-3 pr-9 py-1.5 text-xs rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-              />
-            </div>
+            <button
+              type="button"
+              onClick={() => setSearchModalOpen(true)}
+              className="relative max-w-xs sm:w-80 flex items-center justify-between pl-3 pr-9 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50 hover:bg-white hover:border-slate-300 text-slate-400 transition-all text-right shadow-sm group"
+            >
+              <Search className="absolute right-3 top-2 h-4 w-4 text-slate-400 group-hover:text-indigo-600 transition" />
+              <span className="truncate">بحث سريع بالأصناف، الباتشات، الفواتير...</span>
+              <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono text-slate-500 bg-slate-200/70 rounded">
+                Ctrl+K
+              </kbd>
+            </button>
           </div>
 
           <div className="flex items-center gap-3">
@@ -158,13 +178,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
 
             {/* Quick Traceability Action */}
-            <button
-              type="button"
+            <Link
+              href="/inventory/movements"
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
             >
               <ShieldCheck className="h-4 w-4 text-indigo-600" />
-              <span>تدقيق الرقابة</span>
-            </button>
+              <span>سجل الحركات الرقابي</span>
+            </Link>
           </div>
         </header>
 
@@ -173,6 +193,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
+
+      {/* Global Omnisearch Modal */}
+      <GlobalSearchModal
+        isOpen={searchModalOpen}
+        onClose={() => setSearchModalOpen(false)}
+      />
     </div>
   );
 }
