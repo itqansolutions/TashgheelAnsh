@@ -15,6 +15,10 @@ import {
 } from "lucide-react";
 import { PrintButton } from "@/components/ui/PrintButton";
 
+import { SettingsRepository } from "@/server/repositories/settingsRepository";
+import { CompanyPrintHeader } from "@/components/printing/CompanyPrintHeader";
+import { CompanyPrintFooter } from "@/components/printing/CompanyPrintFooter";
+
 export default async function SupplierStatementPage({
   params,
   searchParams,
@@ -25,7 +29,11 @@ export default async function SupplierStatementPage({
   const { id } = await params;
   const { fromDate, toDate } = await searchParams;
 
-  const supplier = await PartnersRepository.getPartnerById(id);
+  const [supplier, settings] = await Promise.all([
+    PartnersRepository.getPartnerById(id),
+    SettingsRepository.getSettings(),
+  ]);
+
   if (!supplier) notFound();
 
   const entries = await PartnersRepository.getStatement(id, fromDate, toDate);
@@ -92,25 +100,14 @@ export default async function SupplierStatementPage({
 
         {/* Printable Statement Sheet */}
         <div className="bg-white p-4 sm:p-8 lg:p-12 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-md space-y-6 print:border-none print:shadow-none print:p-0">
-          {/* Statement Header */}
-          <div className="flex flex-col sm:flex-row justify-between gap-4 pb-6 border-b-2 border-slate-900">
-            <div>
-              <div className="flex items-center gap-2 font-extrabold text-slate-900 text-base sm:text-lg">
-                <Building2 className="h-5 sm:h-6 w-5 sm:w-6 text-indigo-600" />
-                <span>الشركة المصرية للتجارة والصناعات الهندسية</span>
-              </div>
-              <p className="text-xs text-slate-500 mt-1">
-                الإدارة المالية والحسابات • سجل تجاري: 45890 • بطاقة ضريبية: 900-112-334
-              </p>
-              <p className="text-xs text-slate-500">القاهرة، مصر • هاتف: +20233445566</p>
-            </div>
-
-            <div className="text-right sm:text-left">
-              <h2 className="text-lg sm:text-xl font-extrabold text-slate-900">كشف حساب معتمد</h2>
-              <p className="text-xs font-mono text-indigo-600 font-bold mt-0.5">STATEMENT OF ACCOUNT</p>
-              <p className="text-xs text-slate-400 mt-0.5">تاريخ الإصدار: {new Date().toISOString().split("T")[0]}</p>
-            </div>
-          </div>
+          {/* Dynamic Company Statement Header */}
+          <CompanyPrintHeader
+            settings={settings}
+            documentTitle="كشف حساب معتمد"
+            documentNumber={`STMT-${supplier.code}`}
+            documentDate={new Date().toISOString().split("T")[0]}
+            badgeLabel="مطابق للدفاتر المحاسبية"
+          />
 
           {/* Partner Info & Balance Box */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200">
@@ -251,21 +248,16 @@ export default async function SupplierStatementPage({
             </table>
           </div>
 
-          {/* Signatures Footer */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 sm:pt-12 text-center text-xs text-slate-600 border-t border-slate-200">
-            <div>
-              <p className="font-bold text-slate-800 mb-6 sm:mb-8">إعداد المحاسب المسؤول</p>
-              <div className="w-32 border-b border-slate-400 mx-auto" />
-            </div>
-            <div>
-              <p className="font-bold text-slate-800 mb-6 sm:mb-8">المراجعة والتدقيق المالي</p>
-              <div className="w-32 border-b border-slate-400 mx-auto" />
-            </div>
-            <div>
-              <p className="font-bold text-slate-800 mb-6 sm:mb-8">المدير المالي والاعتماد</p>
-              <div className="w-32 border-b border-slate-400 mx-auto" />
-            </div>
-          </div>
+          {/* Dynamic Company Footer */}
+          <CompanyPrintFooter
+            settings={settings}
+            signatures={[
+              { title: "إعداد المحاسب المسؤول", subtitle: "التوقيع والتاريخ" },
+              { title: "المراجعة والتدقيق المالي", subtitle: "المراجعة الداخلية" },
+              { title: "المدير المالي والاعتماد", subtitle: "الاعتماد والختم الرسمي" },
+            ]}
+            showQr={false}
+          />
         </div>
       </div>
     </AppShell>

@@ -2,9 +2,12 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PurchasesRepository } from "@/server/repositories/purchasesRepository";
+import { SettingsRepository } from "@/server/repositories/settingsRepository";
 import { formatCurrency } from "@/lib/utils";
 import { PrintButton } from "@/components/ui/PrintButton";
-import { ArrowRight, Building2, Package, CheckCircle2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { CompanyPrintHeader } from "@/components/printing/CompanyPrintHeader";
+import { CompanyPrintFooter } from "@/components/printing/CompanyPrintFooter";
 
 export default async function PurchaseInvoicePrintPage({
   params,
@@ -12,7 +15,10 @@ export default async function PurchaseInvoicePrintPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const purchase = await PurchasesRepository.getPurchaseById(id);
+  const [purchase, settings] = await Promise.all([
+    PurchasesRepository.getPurchaseById(id),
+    SettingsRepository.getSettings(),
+  ]);
 
   if (!purchase) notFound();
 
@@ -32,21 +38,14 @@ export default async function PurchaseInvoicePrintPage({
 
       {/* A4 Printable Sheet Container */}
       <div className="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-2xl shadow-md border border-slate-200 print:shadow-none print:border-none print:p-0">
-        {/* Header */}
-        <div className="border-b-2 border-slate-900 pb-6 flex items-start justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">نظام إدارة الإنتاج والتجارة المتكامل</h1>
-            <p className="text-xs text-slate-500 font-mono mt-0.5">TASHGHEEL TRADING & MANUFACTURING ERP</p>
-            <p className="text-xs text-slate-600 mt-2">س.ت: 498302 • ب.ض: 100-245-890 • القاهرة، مصر</p>
-          </div>
-          <div className="text-left font-mono">
-            <span className="inline-block px-3 py-1 bg-slate-900 text-white rounded-lg font-bold text-xs mb-2">
-              فاتورة توريد مشتريات
-            </span>
-            <div className="text-sm font-bold text-slate-900">{purchase.invoiceNumber}</div>
-            <div className="text-xs text-slate-500 mt-1">تاريخ التوريد: {purchase.invoiceDate}</div>
-          </div>
-        </div>
+        {/* Dynamic Company Header */}
+        <CompanyPrintHeader
+          settings={settings}
+          documentTitle="فاتورة توريد مشتريات"
+          documentNumber={purchase.invoiceNumber}
+          documentDate={purchase.invoiceDate}
+          badgeLabel="سند إدخال مخزني معتمد"
+        />
 
         {/* Partner & Warehouse Info */}
         <div className="grid grid-cols-2 gap-6 my-6 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
@@ -84,8 +83,8 @@ export default async function PurchaseInvoicePrintPage({
                   <td className="py-2.5 px-3 border-l border-slate-200 font-bold text-slate-900">{l.productName}</td>
                   <td className="py-2.5 px-3 border-l border-slate-200 font-mono text-indigo-700 font-bold">{l.batchNumber}</td>
                   <td className="py-2.5 px-3 border-l border-slate-200 text-center font-mono font-bold">{l.quantity.toLocaleString()}</td>
-                  <td className="py-2.5 px-3 border-l border-slate-200 text-left font-mono">{formatCurrency(l.unitCost)}</td>
-                  <td className="py-2.5 px-3 text-left font-mono font-bold">{formatCurrency(l.lineTotal)}</td>
+                  <td className="py-2.5 px-3 border-l border-slate-200 text-left font-mono">{formatCurrency(l.unitCost, settings.currency)}</td>
+                  <td className="py-2.5 px-3 text-left font-mono font-bold">{formatCurrency(l.lineTotal, settings.currency)}</td>
                 </tr>
               ))}
             </tbody>
@@ -97,44 +96,39 @@ export default async function PurchaseInvoicePrintPage({
           <div className="w-72 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
             <div className="flex justify-between text-slate-600">
               <span>إجمالي البضاعة:</span>
-              <span className="font-mono font-bold">{formatCurrency(purchase.subtotal)}</span>
+              <span className="font-mono font-bold">{formatCurrency(purchase.subtotal, settings.currency)}</span>
             </div>
             {purchase.discountAmount > 0 && (
               <div className="flex justify-between text-rose-600">
                 <span>الخصم التجاري المكتسب:</span>
-                <span className="font-mono font-bold">-{formatCurrency(purchase.discountAmount)}</span>
+                <span className="font-mono font-bold">-{formatCurrency(purchase.discountAmount, settings.currency)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-300">
               <span>صافي الفاتورة الإجمالي:</span>
-              <span className="font-mono text-indigo-700">{formatCurrency(purchase.totalAmount)}</span>
+              <span className="font-mono text-indigo-700">{formatCurrency(purchase.totalAmount, settings.currency)}</span>
             </div>
             <div className="flex justify-between text-xs font-semibold text-emerald-700 pt-1">
               <span>المدفوع:</span>
-              <span className="font-mono">{formatCurrency(purchase.paidAmount)}</span>
+              <span className="font-mono">{formatCurrency(purchase.paidAmount, settings.currency)}</span>
             </div>
             <div className="flex justify-between text-xs font-semibold text-rose-600">
               <span>المتبقي للمورد (دائن):</span>
-              <span className="font-mono">{formatCurrency(purchase.remainingAmount)}</span>
+              <span className="font-mono">{formatCurrency(purchase.remainingAmount, settings.currency)}</span>
             </div>
           </div>
         </div>
 
-        {/* Signatures & Approvals Footer */}
-        <div className="grid grid-cols-3 gap-6 pt-12 mt-12 border-t border-slate-300 text-center text-xs">
-          <div>
-            <div className="text-slate-500 mb-8 font-semibold">أمين المستودع المستلم</div>
-            <div className="border-t border-dashed border-slate-400 w-3/4 mx-auto pt-1 font-bold">التوقيع والتاريخ</div>
-          </div>
-          <div>
-            <div className="text-slate-500 mb-8 font-semibold">المحاسب المسؤول</div>
-            <div className="border-t border-dashed border-slate-400 w-3/4 mx-auto pt-1 font-bold">التوقيع والختم</div>
-          </div>
-          <div>
-            <div className="text-slate-500 mb-8 font-semibold">اعتماد إدارة المشتريات</div>
-            <div className="border-t border-dashed border-slate-400 w-3/4 mx-auto pt-1 font-bold">التوقيع والاعتماد</div>
-          </div>
-        </div>
+        {/* Dynamic Company Footer */}
+        <CompanyPrintFooter
+          settings={settings}
+          signatures={[
+            { title: "أمين المستودع المستلم", subtitle: "التوقيع والتاريخ" },
+            { title: "المحاسب المسؤول", subtitle: "المراجعة والتسجيل" },
+            { title: "اعتماد إدارة المشتريات", subtitle: "الختم والتصديق" },
+          ]}
+          showQr={false}
+        />
       </div>
     </div>
   );

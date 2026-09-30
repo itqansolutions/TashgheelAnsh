@@ -10,9 +10,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "نظام إدارة التجارة والتصنيع والمخازن | Enterprise ERP",
+  title: "TASHGHEEL TRADE | Trading • Inventory • Outsourced Manufacturing",
   description:
-    "منظومة متكاملة لإدارة التوريدات، التصنيع لدى الغير، تكلفة التشغيلات، وحسابات العملاء والموردين بدقة محاسبية ومعايير الحوكمة.",
+    "تشغيل تريد — منظومة متكاملة لإدارة التجارة والمخزون والتصنيع لدى الغير بدقة محاسبية وحوكمة متقدمة.",
 };
 
 export default function RootLayout({

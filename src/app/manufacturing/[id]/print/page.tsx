@@ -2,9 +2,12 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ManufacturingRepository } from "@/server/repositories/manufacturingRepository";
+import { SettingsRepository } from "@/server/repositories/settingsRepository";
 import { formatCurrency } from "@/lib/utils";
 import { PrintButton } from "@/components/ui/PrintButton";
-import { ArrowRight, Factory, Package, Layers } from "lucide-react";
+import { ArrowRight, Package, Layers } from "lucide-react";
+import { CompanyPrintHeader } from "@/components/printing/CompanyPrintHeader";
+import { CompanyPrintFooter } from "@/components/printing/CompanyPrintFooter";
 
 export default async function ManufacturingOrderPrintPage({
   params,
@@ -12,7 +15,10 @@ export default async function ManufacturingOrderPrintPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const order = await ManufacturingRepository.getOrderById(id);
+  const [order, settings] = await Promise.all([
+    ManufacturingRepository.getOrderById(id),
+    SettingsRepository.getSettings(),
+  ]);
 
   if (!order) notFound();
 
@@ -32,21 +38,14 @@ export default async function ManufacturingOrderPrintPage({
 
       {/* A4 Sheet Container */}
       <div className="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-2xl shadow-md border border-slate-200 print:shadow-none print:border-none print:p-0">
-        {/* Header */}
-        <div className="border-b-2 border-slate-900 pb-6 flex items-start justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-slate-900">نظام إدارة الإنتاج والتجارة المتكامل</h1>
-            <p className="text-xs text-slate-500 font-mono mt-0.5">TASHGHEEL TRADING & MANUFACTURING ERP</p>
-            <p className="text-xs text-slate-600 mt-2">إذن تشغيل وصرف خامات لجهة تصنيع خارجية (Outsourced Job Order)</p>
-          </div>
-          <div className="text-left font-mono">
-            <span className="inline-block px-3 py-1 bg-indigo-950 text-white rounded-lg font-bold text-xs mb-2">
-              أمر تشغيل لدى الغير
-            </span>
-            <div className="text-sm font-bold text-slate-900">{order.orderNumber}</div>
-            <div className="text-xs text-slate-500 mt-1">تاريخ الإصدار: {order.startDate}</div>
-          </div>
-        </div>
+        {/* Dynamic Company Header */}
+        <CompanyPrintHeader
+          settings={settings}
+          documentTitle="أمر تشغيل لدى الغير"
+          documentNumber={order.orderNumber}
+          documentDate={order.startDate}
+          badgeLabel="إذن صرف وتشغيل رسمي"
+        />
 
         {/* Order Details Header */}
         <div className="grid grid-cols-2 gap-6 my-6 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
@@ -88,8 +87,8 @@ export default async function ManufacturingOrderPrintPage({
                   <td className="py-2 px-3 border-l border-slate-200 font-bold text-slate-900">{inp.productName}</td>
                   <td className="py-2 px-3 border-l border-slate-200 font-mono text-indigo-700 font-bold">{inp.batchNumber}</td>
                   <td className="py-2 px-3 border-l border-slate-200 text-center font-mono font-bold">{inp.quantity.toLocaleString()}</td>
-                  <td className="py-2 px-3 border-l border-slate-200 text-left font-mono">{formatCurrency(inp.unitCost)}</td>
-                  <td className="py-2 px-3 text-left font-mono font-bold">{formatCurrency(inp.totalCost)}</td>
+                  <td className="py-2 px-3 border-l border-slate-200 text-left font-mono">{formatCurrency(inp.unitCost, settings.currency)}</td>
+                  <td className="py-2 px-3 text-left font-mono font-bold">{formatCurrency(inp.totalCost, settings.currency)}</td>
                 </tr>
               ))}
             </tbody>
@@ -123,8 +122,8 @@ export default async function ManufacturingOrderPrintPage({
                   </td>
                   <td className="py-2 px-3 border-l border-slate-200 text-center font-mono font-bold">{out.quantity.toLocaleString()}</td>
                   <td className="py-2 px-3 border-l border-slate-200 text-center font-mono font-bold text-emerald-600">{out.allocationPercentage}%</td>
-                  <td className="py-2 px-3 border-l border-slate-200 text-left font-mono font-bold">{formatCurrency(out.allocatedCost)}</td>
-                  <td className="py-2 px-3 text-left font-mono font-bold text-indigo-700">{formatCurrency(out.calculatedUnitCost)}</td>
+                  <td className="py-2 px-3 border-l border-slate-200 text-left font-mono font-bold">{formatCurrency(out.allocatedCost, settings.currency)}</td>
+                  <td className="py-2 px-3 text-left font-mono font-bold text-indigo-700">{formatCurrency(out.calculatedUnitCost, settings.currency)}</td>
                 </tr>
               ))}
             </tbody>
@@ -136,19 +135,19 @@ export default async function ManufacturingOrderPrintPage({
           <div className="w-80 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
             <div className="flex justify-between text-slate-600">
               <span>إجمالي تكلفة الخامات المنصرفة:</span>
-              <span className="font-mono font-bold">{formatCurrency(order.totalMaterialCost)}</span>
+              <span className="font-mono font-bold">{formatCurrency(order.totalMaterialCost, settings.currency)}</span>
             </div>
             <div className="flex justify-between text-slate-600">
               <span>أتعاب ومصنعية المصنع الخارجية:</span>
-              <span className="font-mono font-bold">{formatCurrency(order.totalFactoryCost)}</span>
+              <span className="font-mono font-bold">{formatCurrency(order.totalFactoryCost, settings.currency)}</span>
             </div>
             <div className="flex justify-between text-slate-600">
               <span>مصروفات إنتاجية وتشغيلية:</span>
-              <span className="font-mono font-bold">{formatCurrency(order.totalExpenseCost)}</span>
+              <span className="font-mono font-bold">{formatCurrency(order.totalExpenseCost, settings.currency)}</span>
             </div>
             <div className="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-300">
               <span>إجمالي تكلفة أمر التصنيع:</span>
-              <span className="font-mono text-indigo-700">{formatCurrency(order.totalManufacturingCost)}</span>
+              <span className="font-mono text-indigo-700">{formatCurrency(order.totalManufacturingCost, settings.currency)}</span>
             </div>
           </div>
         </div>
@@ -156,24 +155,19 @@ export default async function ManufacturingOrderPrintPage({
         {/* Instructions & Handover Notes */}
         <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 my-6">
           <p className="font-bold text-slate-800 mb-1">تعليمات الجودة والتسليم:</p>
-          <p>يلتزم المصنع بالمطابقة التامة للمواصفات الفنية المعتمدة. لا يعتبر الاستلام نهائياً إلا بعد فحص الجودة المخبري وإصدار شهادة الفحص المعتمدة.</p>
+          <p>يلتزم المصنع بالمطابقة التامة للمواصفات الفنية المعتمدة. لا يعتبر الاستلام نهائياً إلا بعد فحص الجودة الفني وإصدار أرقام الباتشات التامة.</p>
         </div>
 
-        {/* Signatures */}
-        <div className="grid grid-cols-3 gap-6 pt-8 mt-8 border-t border-slate-300 text-center text-xs">
-          <div>
-            <div className="text-slate-500 mb-8 font-semibold">مسؤول صرف الخامات</div>
-            <div className="border-t border-dashed border-slate-400 w-3/4 mx-auto pt-1 font-bold">التوقيع والتاريخ</div>
-          </div>
-          <div>
-            <div className="text-slate-500 mb-8 font-semibold">مندوب استلام المصنع الخارجي</div>
-            <div className="border-t border-dashed border-slate-400 w-3/4 mx-auto pt-1 font-bold">الاسم والرقم القومي والتوقيع</div>
-          </div>
-          <div>
-            <div className="text-slate-500 mb-8 font-semibold">مدير إدارة الإنتاج والتشغيل</div>
-            <div className="border-t border-dashed border-slate-400 w-3/4 mx-auto pt-1 font-bold">الاعتماد والختم</div>
-          </div>
-        </div>
+        {/* Dynamic Company Footer */}
+        <CompanyPrintFooter
+          settings={settings}
+          signatures={[
+            { title: "مسؤول صرف الخامات", subtitle: "التوقيع والتاريخ" },
+            { title: "مندوب استلام المصنع الخارجي", subtitle: "الاسم والتوقيع" },
+            { title: "مدير إدارة الإنتاج والتشغيل", subtitle: "الاعتماد والختم" },
+          ]}
+          showQr={false}
+        />
       </div>
     </div>
   );

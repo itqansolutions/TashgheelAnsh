@@ -63,13 +63,23 @@ async function main() {
     where: { code: "ADMIN" },
   });
 
-  const passwordHash = await bcrypt.hash("Admin@123456", 10);
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@tashgheel.com";
+  const adminUsername = process.env.ADMIN_USERNAME || "admin";
+  const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
+
   const adminUser = await prisma.user.upsert({
-    where: { email: "admin@enterprise.com" },
-    update: { passwordHash },
+    where: { email: adminEmail },
+    update: {
+      passwordHash,
+      username: adminUsername,
+      name: "مدير النظام العام (Admin)",
+    },
     create: {
       name: "مدير النظام العام (Admin)",
-      email: "admin@enterprise.com",
+      username: adminUsername,
+      email: adminEmail,
+      phone: "01001234567",
       passwordHash,
       isActive: true,
     },
@@ -274,6 +284,41 @@ async function main() {
       create: exp,
     });
   }
+
+  // 11. Seed Company Settings & Branding
+  console.log("11. Seeding Company Settings & Branding...");
+  await prisma.companySettings.upsert({
+    where: { id: "default-company" },
+    update: {
+      nameAr: "تشغيل تريد للتجارة والتصنيع المشترك",
+      nameEn: "TASHGHEEL TRADE — Trading • Inventory • Outsourced Manufacturing",
+      taxNumber: "30098712300003",
+      commercialReg: "498302",
+      phone: "02-33445566",
+      mobile: "01001234567",
+      email: "contact@tashgheeltrade.com",
+      website: "www.tashgheeltrade.com",
+      address: "القاهرة، جمهورية مصر العربية",
+      city: "القاهرة",
+      country: "مصر",
+      printFooterNotes: "تم استخراج هذا المستند آلياً من نظام TASHGHEEL TRADE",
+    },
+    create: {
+      id: "default-company",
+      nameAr: "تشغيل تريد للتجارة والتصنيع المشترك",
+      nameEn: "TASHGHEEL TRADE — Trading • Inventory • Outsourced Manufacturing",
+      taxNumber: "30098712300003",
+      commercialReg: "498302",
+      phone: "02-33445566",
+      mobile: "01001234567",
+      email: "contact@tashgheeltrade.com",
+      website: "www.tashgheeltrade.com",
+      address: "القاهرة، جمهورية مصر العربية",
+      city: "القاهرة",
+      country: "مصر",
+      printFooterNotes: "تم استخراج هذا المستند آلياً من نظام TASHGHEEL TRADE",
+    },
+  });
 
   console.log("✅ Database seeding completed successfully!");
 }

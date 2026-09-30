@@ -126,17 +126,49 @@ enum DocumentSequenceType {
 }
 
 // ----------------------------------------------------
+// 0. COMPANY SETTINGS & BRANDING
+// ----------------------------------------------------
+
+model CompanySettings {
+  id               String   @id @default("default-company")
+  nameAr           String   @default("تشغيل تريد للتجارة والتصنيع المشترك")
+  nameEn           String   @default("TASHGHEEL TRADE — Trading • Inventory • Outsourced Manufacturing")
+  taxNumber        String?  @default("30098712300003")
+  commercialReg    String?  @default("498302")
+  phone            String?  @default("02-33445566")
+  mobile           String?  @default("01001234567")
+  email            String?  @default("contact@tashgheeltrade.com")
+  website          String?  @default("www.tashgheeltrade.com")
+  address          String?  @default("القاهرة، جمهورية مصر العربية")
+  city             String?  @default("القاهرة")
+  country          String?  @default("مصر")
+  logoUrl          String?  @db.Text
+  printHeaderNotes String?
+  printFooterNotes String?  @default("تم استخراج هذا المستند آلياً من نظام TASHGHEEL TRADE")
+  currency         String   @default("EGP")
+  updatedById      String?
+  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now())
+
+  @@index([id])
+}
+
+// ----------------------------------------------------
 // 1. SECURITY & ACCESS CONTROL
 // ----------------------------------------------------
 
 model User {
-  id           String    @id @default(cuid())
-  name         String
-  email        String    @unique
-  passwordHash String
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                String    @id @default(cuid())
+  username          String?   @unique
+  name              String
+  email             String    @unique
+  phone             String?
+  passwordHash      String
+  isActive          Boolean   @default(true)
+  lastLoginAt       DateTime?
+  customPermissions String[]  @default([])
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   userRoles               UserRole[]
   auditLogs               AuditLog[]

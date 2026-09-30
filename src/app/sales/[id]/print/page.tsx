@@ -2,9 +2,12 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SalesRepository } from "@/server/repositories/salesRepository";
+import { SettingsRepository } from "@/server/repositories/settingsRepository";
 import { formatCurrency } from "@/lib/utils";
 import { PrintButton } from "@/components/ui/PrintButton";
-import { ArrowRight, BadgeDollarSign, ShieldCheck, QrCode } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { CompanyPrintHeader } from "@/components/printing/CompanyPrintHeader";
+import { CompanyPrintFooter } from "@/components/printing/CompanyPrintFooter";
 
 export default async function SalesInvoicePrintPage({
   params,
@@ -12,7 +15,10 @@ export default async function SalesInvoicePrintPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const sale = await SalesRepository.getSaleById(id);
+  const [sale, settings] = await Promise.all([
+    SalesRepository.getSaleById(id),
+    SettingsRepository.getSettings(),
+  ]);
 
   if (!sale) notFound();
 
@@ -32,27 +38,15 @@ export default async function SalesInvoicePrintPage({
 
       {/* A4 Sheet Container */}
       <div className="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-2xl shadow-md border border-slate-200 print:shadow-none print:border-none print:p-0">
-        {/* Header */}
-        <div className="border-b-2 border-slate-900 pb-6 flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-lg font-black text-slate-900">شركة التشغيل والتجارة المتطورة</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200">
-                فاتورة ضريبية رسمية
-              </span>
-            </div>
-            <p className="text-xs text-slate-500 font-mono">TASHGHEEL TRADING ENTERPRISE CO.</p>
-            <p className="text-xs text-slate-600 mt-2">
-              س.ت: 498302 • ب.ض: 100-245-890 • الرقم الضريبي الموحد: 30098712300003
-            </p>
-            <p className="text-xs text-slate-600">القاهرة، جمهورية مصر العربية • هاتف: 02-33445566</p>
-          </div>
-          <div className="text-left font-mono">
-            <div className="text-base font-bold text-slate-900">{sale.invoiceNumber}</div>
-            <div className="text-xs text-slate-500 mt-1">تاريخ الإصدار: {sale.invoiceDate}</div>
-            {sale.dueDate && <div className="text-xs text-rose-600 font-bold mt-0.5">تاريخ الاستحقاق: {sale.dueDate}</div>}
-          </div>
-        </div>
+        {/* Dynamic Company Header */}
+        <CompanyPrintHeader
+          settings={settings}
+          documentTitle="فاتورة مبيعات ضريبية"
+          documentNumber={sale.invoiceNumber}
+          documentDate={sale.invoiceDate}
+          dueDate={sale.dueDate}
+          badgeLabel="فاتورة رسمية معتمدة"
+        />
 
         {/* Customer Information */}
         <div className="grid grid-cols-2 gap-6 my-6 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
@@ -103,10 +97,10 @@ export default async function SalesInvoicePrintPage({
                     {l.quantity.toLocaleString()}
                   </td>
                   <td className="py-2.5 px-3 border-l border-slate-200 text-left font-mono">
-                    {formatCurrency(l.unitPrice)}
+                    {formatCurrency(l.unitPrice, settings.currency)}
                   </td>
                   <td className="py-2.5 px-3 text-left font-mono font-bold text-slate-900">
-                    {formatCurrency(l.lineSubtotal)}
+                    {formatCurrency(l.lineSubtotal, settings.currency)}
                   </td>
                 </tr>
               ))}
@@ -118,56 +112,49 @@ export default async function SalesInvoicePrintPage({
         <div className="flex justify-between items-start my-6">
           {/* Bank Payment Instructions */}
           <div className="w-80 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1">
-            <span className="font-bold text-slate-800 block mb-1">بيانات التحويل البنكي:</span>
-            <p>بنك مصر - فرع الشركات الرئيسي</p>
-            <p className="font-mono font-bold text-slate-900">IBAN: EG4500020001000000123456789</p>
-            <p className="text-[11px] text-slate-400 mt-2">يرجى إرفاق رقم الفاتورة عند التحويل البنكي.</p>
+            <span className="font-bold text-slate-800 block mb-1">بيانات السداد والتحويل:</span>
+            <p>{settings.nameAr} - الحسابات المركزية</p>
+            {settings.phone && <p className="font-mono text-slate-700" dir="ltr">هاتف التحصيل: {settings.phone}</p>}
+            <p className="text-[11px] text-slate-400 mt-2">يرجى إرفاق رقم الفاتورة ({sale.invoiceNumber}) عند إجراء السداد.</p>
           </div>
 
           {/* Amount Calculation */}
           <div className="w-72 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs">
             <div className="flex justify-between text-slate-600">
               <span>إجمالي المبيعات:</span>
-              <span className="font-mono font-bold">{formatCurrency(sale.subtotal)}</span>
+              <span className="font-mono font-bold">{formatCurrency(sale.subtotal, settings.currency)}</span>
             </div>
             {sale.discountAmount > 0 && (
               <div className="flex justify-between text-rose-600">
                 <span>الخصم التجاري الممنوح:</span>
-                <span className="font-mono font-bold">-{formatCurrency(sale.discountAmount)}</span>
+                <span className="font-mono font-bold">-{formatCurrency(sale.discountAmount, settings.currency)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-300">
               <span>صافي القيمة المستحقة:</span>
-              <span className="font-mono text-indigo-700">{formatCurrency(sale.totalAmount)}</span>
+              <span className="font-mono text-indigo-700">{formatCurrency(sale.totalAmount, settings.currency)}</span>
             </div>
             <div className="flex justify-between text-xs font-semibold text-emerald-700 pt-1">
               <span>المسدد نقداً / بنكياً:</span>
-              <span className="font-mono">{formatCurrency(sale.paidAmount)}</span>
+              <span className="font-mono">{formatCurrency(sale.paidAmount, settings.currency)}</span>
             </div>
             <div className="flex justify-between text-xs font-semibold text-rose-600">
               <span>الرصيد المتبقي على العميل:</span>
-              <span className="font-mono">{formatCurrency(sale.remainingAmount)}</span>
+              <span className="font-mono">{formatCurrency(sale.remainingAmount, settings.currency)}</span>
             </div>
           </div>
         </div>
 
-        {/* QR Code & Digital Compliance Footer */}
-        <div className="grid grid-cols-3 gap-6 pt-8 mt-8 border-t border-slate-300 text-xs">
-          <div className="text-center">
-            <div className="text-slate-500 mb-8 font-semibold">المستلم المعتمد للعميل</div>
-            <div className="border-t border-dashed border-slate-400 w-3/4 mx-auto pt-1 font-bold">التوقيع والاستلام</div>
-          </div>
-          <div className="flex flex-col items-center justify-center">
-            <div className="h-16 w-16 border-2 border-slate-800 rounded-lg flex items-center justify-center bg-slate-50">
-              <QrCode className="h-12 w-12 text-slate-900" />
-            </div>
-            <span className="text-[10px] text-slate-400 mt-1 font-mono">ZATCA / ETA Verified</span>
-          </div>
-          <div className="text-center">
-            <div className="text-slate-500 mb-8 font-semibold">إدارة المبيعات والحسابات</div>
-            <div className="border-t border-dashed border-slate-400 w-3/4 mx-auto pt-1 font-bold">الختم والاعتماد الرسمي</div>
-          </div>
-        </div>
+        {/* Dynamic Company Footer */}
+        <CompanyPrintFooter
+          settings={settings}
+          signatures={[
+            { title: "المستلم المعتمد للعميل", subtitle: "التوقيع والاستلام" },
+            { title: "إدارة المبيعات والحسابات", subtitle: "الختم والاعتماد الرسمي" },
+          ]}
+          showQr={true}
+          qrCaption="ZATCA / ETA Verified"
+        />
       </div>
     </div>
   );
