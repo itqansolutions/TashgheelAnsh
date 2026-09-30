@@ -90,7 +90,7 @@ describe("Phase 2 — End-to-End Business Cycle Verification", () => {
         warehouseId: "wh-1",
         invoiceDate: new Date("2026-06-01"),
         dueDate: new Date("2026-07-15"),
-        paymentMethod: "CREDIT",
+        paymentTerms: "CREDIT",
         notes: "توريد 1000 متر قماش قطن خام",
         lines: [
           {
@@ -98,6 +98,7 @@ describe("Phase 2 — End-to-End Business Cycle Verification", () => {
             quantity: 1000,
             unitCost: 50,
             discountAmount: 0,
+            taxRate: 0,
           },
         ],
       },
@@ -368,6 +369,7 @@ describe("Phase 2 — End-to-End Business Cycle Verification", () => {
             quantity: 200,
             unitPrice: 180,
             discountAmount: 0,
+            allowBelowCost: false,
             allocations: [
               {
                 batchId: finishedBatchNumber,
