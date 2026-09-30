@@ -81,57 +81,97 @@ export default async function ProductDetailPage({
         </div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs font-semibold text-slate-500 block mb-1">الرصيد الفعلي المتاح</span>
-            <div className="text-2xl font-bold text-emerald-600">
+        {/* Metrics Grid (2 columns on mobile, 4 on desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500 block mb-1">الرصيد الفعلي المتاح</span>
+            <div className="text-base sm:text-2xl font-bold text-emerald-600 font-mono">
               {formatQuantity(product.currentStock, product.uomSymbol)}
             </div>
-            <span className="text-[11px] text-slate-400 mt-1 block">محسوب من مجموع اللوتات النشطة</span>
+            <span className="text-[10px] sm:text-[11px] text-slate-400 mt-1 block">مجموع اللوتات النشطة</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs font-semibold text-slate-500 block mb-1">قيمة المخزون المقيدة</span>
-            <div className="text-2xl font-bold text-slate-900">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500 block mb-1">قيمة المخزون المقيدة</span>
+            <div className="text-base sm:text-2xl font-bold text-slate-900 font-mono">
               {formatCurrency(product.totalInventoryValue)}
             </div>
-            <span className="text-[11px] text-slate-400 mt-1 block">بناء على تكاليف الباتشات الفعلية</span>
+            <span className="text-[10px] sm:text-[11px] text-slate-400 mt-1 block">بالتكلفة الفعلية</span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs font-semibold text-slate-500 block mb-1">سعر البيع الافتراضي</span>
-            <div className="text-2xl font-bold text-slate-900">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500 block mb-1">سعر البيع الافتراضي</span>
+            <div className="text-base sm:text-2xl font-bold text-slate-900 font-mono">
               {formatCurrency(product.defaultSellingPrice)}
             </div>
-            <span className="text-[11px] text-slate-400 mt-1 block">
+            <span className="text-[10px] sm:text-[11px] text-slate-400 mt-1 block">
               الحد الأدنى: {formatCurrency(product.minSellingPrice)}
             </span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs font-semibold text-slate-500 block mb-1">التكلفة الاسترشادية</span>
-            <div className="text-2xl font-bold text-indigo-600">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500 block mb-1">التكلفة الاسترشادية</span>
+            <div className="text-base sm:text-2xl font-bold text-indigo-600 font-mono">
               {formatCurrency(product.referenceCost)}
             </div>
-            <span className="text-[11px] text-slate-400 mt-1 block">لتقديرات العروض والتسعير</span>
+            <span className="text-[10px] sm:text-[11px] text-slate-400 mt-1 block">لتقديرات العروض</span>
           </div>
         </div>
 
         {/* Active Batches Section */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="px-4 py-3.5 sm:px-6 sm:py-4 border-b border-slate-100 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">تشغيلات الباتش (Lots / Batches) المخزنية</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-sm font-bold text-slate-900">تشغيلات الباتش (Lots) المخزنية</h3>
+              <p className="text-xs text-slate-500 hidden sm:block">
                 كل كمية تحتفظ بتكلفتها المستقلة دون دمج بأي متوسط تكلفة
               </p>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200">
-              {batches.length} باتش نشط
+              {batches.length} لوت
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile Card List for Batches (sm:hidden) */}
+          <div className="sm:hidden divide-y divide-slate-100">
+            {batches.map((b) => (
+              <div key={b.id} className="p-3.5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono font-bold text-xs text-indigo-600">{b.batchNumber}</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                    {b.sourceDoc}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-500">{b.warehouseName}</div>
+                <div className="grid grid-cols-3 gap-1 p-2 bg-slate-50 rounded-xl border border-slate-100 text-[11px] font-mono">
+                  <div>
+                    <span className="text-[10px] text-slate-400 block">المتاح</span>
+                    <span className="font-bold text-emerald-600">{b.remainingQty} {product.uomSymbol}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 block">تكلفة الوحدة</span>
+                    <span className="text-slate-800">{formatCurrency(b.unitCost)}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 block">إجمالي اللوت</span>
+                    <span className="font-bold text-indigo-700">{formatCurrency(b.totalCost)}</span>
+                  </div>
+                </div>
+                <div className="pt-1 flex justify-end">
+                  <Link
+                    href={`/inventory/batches/${b.id}`}
+                    className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center gap-1 transition"
+                  >
+                    <span>شجرة التتبع</span>
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table (hidden sm:block) */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-right text-xs">
               <thead className="bg-slate-50 text-slate-500 font-semibold uppercase">
                 <tr>

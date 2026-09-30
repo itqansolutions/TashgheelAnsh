@@ -87,62 +87,62 @@ export default function DashboardPage() {
 
         {activeTab === "overview" ? (
           <>
-            {/* KPI Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Sales Card */}
-              <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
-                <div className="flex items-center justify-between text-slate-500 mb-3">
-                  <span className="text-xs font-semibold">إجمالي المبيعات (الفترة)</span>
-                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
-                    <TrendingUp className="h-5 w-5" />
+            {/* KPI Cards Grid (2 columns on mobile, 4 columns on desktop) */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+              {/* 1. Sales Card */}
+              <div className="p-3.5 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between text-slate-500 mb-2 sm:mb-3">
+                  <span className="text-[11px] sm:text-xs font-semibold">إجمالي المبيعات</span>
+                  <div className="p-1.5 sm:p-2 rounded-xl bg-emerald-50 text-emerald-600">
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-slate-900">425,800.00 EGP</div>
-                <div className="flex items-center gap-1.5 mt-2 text-xs text-emerald-600 font-medium">
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                  <span>محقق من 38 فاتورة معتمدة</span>
+                <div className="text-base sm:text-2xl font-bold text-slate-900 font-mono">425,800 ج</div>
+                <div className="flex items-center gap-1 mt-1 text-[10px] sm:text-xs text-emerald-600 font-medium">
+                  <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <span className="truncate">38 فاتورة معتمدة</span>
                 </div>
               </div>
 
-              {/* Realized Profit Card */}
-              <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
-                <div className="flex items-center justify-between text-slate-500 mb-3">
-                  <span className="text-xs font-semibold">مجمل الربح المحقق (Gross Profit)</span>
-                  <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600">
-                    <BadgeDollarSign className="h-5 w-5" />
+              {/* 2. Realized Profit Card */}
+              <div className="p-3.5 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between text-slate-500 mb-2 sm:mb-3">
+                  <span className="text-[11px] sm:text-xs font-semibold">مجمل الربح التجاري</span>
+                  <div className="p-1.5 sm:p-2 rounded-xl bg-indigo-50 text-indigo-600">
+                    <BadgeDollarSign className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-slate-900">118,450.00 EGP</div>
-                <div className="flex items-center gap-1.5 mt-2 text-xs text-indigo-600 font-medium">
-                  <span>هامش الربح: 27.8% (محسوب ضد تكلفة الباتش)</span>
+                <div className="text-base sm:text-2xl font-bold text-slate-900 font-mono">118,450 ج</div>
+                <div className="flex items-center gap-1 mt-1 text-[10px] sm:text-xs text-indigo-600 font-medium">
+                  <span>هامش الربح: 27.8%</span>
                 </div>
               </div>
 
-              {/* Batch Inventory Value */}
-              <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
-                <div className="flex items-center justify-between text-slate-500 mb-3">
-                  <span className="text-xs font-semibold">تقييم المخزون الفعلي (بالباتش)</span>
-                  <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
-                    <Package className="h-5 w-5" />
+              {/* 3. Batch Inventory Value */}
+              <div className="p-3.5 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between text-slate-500 mb-2 sm:mb-3">
+                  <span className="text-[11px] sm:text-xs font-semibold">تقييم المخزون</span>
+                  <div className="p-1.5 sm:p-2 rounded-xl bg-amber-50 text-amber-600">
+                    <Package className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-slate-900">682,100.00 EGP</div>
-                <div className="flex items-center gap-1.5 mt-2 text-xs text-amber-600 font-medium">
-                  <span>14 باتش نشط في المستودع الرئيسي</span>
+                <div className="text-base sm:text-2xl font-bold text-slate-900 font-mono">682,100 ج</div>
+                <div className="flex items-center gap-1 mt-1 text-[10px] sm:text-xs text-amber-600 font-medium">
+                  <span>14 باتش نشط بالمخزن</span>
                 </div>
               </div>
 
-              {/* Open Manufacturing Orders */}
-              <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
-                <div className="flex items-center justify-between text-slate-500 mb-3">
-                  <span className="text-xs font-semibold">أوامر التصنيع قيد التشغيل</span>
-                  <div className="p-2 rounded-xl bg-sky-50 text-sky-600">
-                    <Factory className="h-5 w-5" />
+              {/* 4. Open Manufacturing Orders */}
+              <div className="p-3.5 sm:p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md transition">
+                <div className="flex items-center justify-between text-slate-500 mb-2 sm:mb-3">
+                  <span className="text-[11px] sm:text-xs font-semibold">أوامر التصنيع</span>
+                  <div className="p-1.5 sm:p-2 rounded-xl bg-sky-50 text-sky-600">
+                    <Factory className="h-4 w-4 sm:h-5 sm:w-5" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-slate-900">3 أوامر جارية</div>
-                <div className="flex items-center gap-1.5 mt-2 text-xs text-sky-600 font-medium">
-                  <span>تكلفة مستوعبة: 145,000 EGP لدى المصانع</span>
+                <div className="text-base sm:text-2xl font-bold text-slate-900 font-mono">3 جارية</div>
+                <div className="flex items-center gap-1 mt-1 text-[10px] sm:text-xs text-sky-600 font-medium">
+                  <span className="truncate">تكلفة: 145,000 ج</span>
                 </div>
               </div>
             </div>
@@ -252,7 +252,83 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* Mobile Card View (sm:hidden) */}
+              <div className="sm:hidden divide-y divide-slate-100">
+                <div className="p-3.5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-bold text-xs text-indigo-600">BAT-2026-000001</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+                      توريد PUR-001
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-slate-900">لفائف صاج معالج 2 مم</p>
+                  <div className="grid grid-cols-3 gap-1 pt-1 text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-100 font-mono">
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">المتاح</span>
+                      <span className="font-bold text-emerald-600">300 كجم</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">الوحدة</span>
+                      <span className="text-slate-700">80.00 ج</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">إجمالي القيمة</span>
+                      <span className="font-bold text-slate-900">24,000 ج</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3.5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-bold text-xs text-indigo-600">BAT-2026-000002</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                      تصنيع MFG-001
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-slate-900">هيكل كابينة نصف مجمع</p>
+                  <div className="grid grid-cols-3 gap-1 pt-1 text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-100 font-mono">
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">المتاح</span>
+                      <span className="font-bold text-emerald-600">120 ق</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">الوحدة</span>
+                      <span className="text-slate-700">185.00 ج</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">إجمالي القيمة</span>
+                      <span className="font-bold text-slate-900">22,200 ج</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3.5 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono font-bold text-xs text-indigo-600">BAT-2026-000003</span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                      تصنيع MFG-002
+                    </span>
+                  </div>
+                  <p className="text-xs font-bold text-slate-900">لوحة توزيع كهربائية قياسية</p>
+                  <div className="grid grid-cols-3 gap-1 pt-1 text-[11px] bg-slate-50 p-2 rounded-xl border border-slate-100 font-mono">
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">المتاح</span>
+                      <span className="font-bold text-emerald-600">35 ق</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">الوحدة</span>
+                      <span className="text-slate-700">520.00 ج</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px]">إجمالي القيمة</span>
+                      <span className="font-bold text-slate-900">18,200 ج</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Table View (hidden sm:block) */}
+              <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-right text-xs">
                   <thead className="bg-slate-50 text-slate-500 uppercase font-semibold">
                     <tr>

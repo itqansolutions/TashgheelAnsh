@@ -108,31 +108,40 @@ export function GlobalSearchModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 md:p-20" dir="rtl">
+    <div className="fixed inset-0 z-50 overflow-hidden p-0 sm:p-6 md:p-20 flex sm:items-start justify-center" dir="rtl">
       {/* Backdrop */}
       <div
         className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
-      {/* Modal Dialog */}
-      <div className="relative mx-auto max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+      {/* Modal Dialog (Full screen on mobile, elegant dialog on desktop) */}
+      <div className="relative w-full h-full sm:h-auto sm:max-h-[85vh] sm:max-w-2xl bg-white sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200 overflow-hidden flex flex-col pt-safe pb-safe">
         {/* Search Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-200 bg-slate-50/50">
-          <Search className="h-5 w-5 text-slate-400" />
+        <div className="flex items-center gap-2 px-4 py-3 sm:px-5 sm:py-4 border-b border-slate-200 bg-slate-50/80">
+          <button
+            type="button"
+            onClick={onClose}
+            className="sm:hidden min-w-[44px] min-h-[44px] flex items-center justify-center text-slate-600 hover:text-slate-900"
+            aria-label="إغلاق البحث"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <Search className="h-5 w-5 text-slate-400 hidden sm:block" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="بحث شامل بالأصناف، الباتشات، الموردين، العملاء، فواتير الشراء، أو أوامر التصنيع..."
-            className="flex-1 bg-transparent text-sm font-medium text-slate-900 focus:outline-none placeholder:text-slate-400"
+            placeholder="بحث بالأصناف، الباتشات، الموردين، الفواتير..."
+            className="flex-1 bg-transparent text-sm sm:text-base font-medium text-slate-900 focus:outline-none placeholder:text-slate-400 h-10"
           />
           {loading && <Loader2 className="h-4 w-4 text-indigo-600 animate-spin" />}
           {query && !loading && (
             <button
               onClick={() => setQuery("")}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200"
+              className="min-w-[40px] min-h-[40px] flex items-center justify-center text-slate-400 hover:text-slate-600"
+              aria-label="مسح نص البحث"
             >
               <X className="h-4 w-4" />
             </button>
@@ -262,15 +271,15 @@ function ResultGroup({
             key={item.id}
             type="button"
             onClick={() => onSelect(item.url)}
-            className="w-full text-right px-3.5 py-2 rounded-xl hover:bg-slate-100 flex items-center justify-between group transition"
+            className="w-full text-right px-3.5 py-2.5 min-h-[48px] rounded-xl hover:bg-slate-100 active:bg-slate-200 flex items-center justify-between group transition"
           >
             <div>
-              <p className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">
+              <p className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition">
                 {item.title}
               </p>
-              <p className="text-[11px] text-slate-500">{item.subtitle}</p>
+              <p className="text-[11px] sm:text-xs text-slate-500">{item.subtitle}</p>
             </div>
-            <CornerDownLeft className="h-3.5 w-3.5 text-slate-300 opacity-0 group-hover:opacity-100 transition" />
+            <CornerDownLeft className="h-4 w-4 text-slate-300 opacity-0 sm:group-hover:opacity-100 transition" />
           </button>
         ))}
       </div>

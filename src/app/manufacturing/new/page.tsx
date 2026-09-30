@@ -41,8 +41,8 @@ export default async function NewManufacturingOrderPage() {
 
   return (
     <AppShell>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
           <div>
             <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
               <Link href="/manufacturing" className="hover:text-indigo-600 transition">
@@ -51,19 +51,19 @@ export default async function NewManufacturingOrderPage() {
               <span>/</span>
               <span className="text-slate-800 font-bold">أمر تشغيل جديد</span>
             </div>
-            <h1 className="text-xl font-bold text-slate-900">فتح أمر تصنيع وتشغيل خارجي لدى الغير</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900">فتح أمر تصنيع وتشغيل خارجي لدى الغير</h1>
           </div>
           <Link
             href="/manufacturing"
-            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition flex items-center gap-1.5"
+            className="w-full sm:w-auto justify-center px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm min-h-[44px] transition flex items-center gap-1.5"
           >
             <ArrowRight className="h-4 w-4" />
             <span>إلغاء وعودة</span>
           </Link>
         </div>
 
-        <form action={handleCreateOrder} className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <form action={handleCreateOrder} className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
                 المصنع المنفذ / شريك التصنيع *
@@ -71,7 +71,7 @@ export default async function NewManufacturingOrderPage() {
               <select
                 name="factoryId"
                 required
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 bg-white font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                className="w-full px-3.5 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 bg-white font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-600 min-h-[44px]"
               >
                 {factories.map((f) => (
                   <option key={f.id} value={f.id}>
@@ -88,7 +88,7 @@ export default async function NewManufacturingOrderPage() {
               <select
                 name="warehouseId"
                 required
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 bg-white font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                className="w-full px-3.5 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 bg-white font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-600 min-h-[44px]"
               >
                 {warehouses.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -107,47 +107,47 @@ export default async function NewManufacturingOrderPage() {
                 name="startDate"
                 required
                 defaultValue={new Date().toISOString().split("T")[0]}
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                className="w-full px-3.5 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-600 min-h-[44px]"
               />
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                تاريخ الانتهاء المتوقع
+                تاريخ الانتهاء المتوقع والتسليم
               </label>
               <input
                 type="date"
                 name="expectedCompletionDate"
-                className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                className="w-full px-3.5 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-600 min-h-[44px]"
               />
             </div>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              ملاحظات أمر التشغيل ومواصفات التشغيل
+              مواصفات أمر التشغيل وملاحظات فنية
             </label>
             <textarea
               name="notes"
               rows={3}
-              placeholder="مثال: تشغيل صاج وتشكيل كبائن طبقاً لرسومات القطع المرفقة..."
-              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              placeholder="مثال: تشغيل صاج 2 مم لإنتاج هياكل لوحات كهربائية وتجهيزها للدهان..."
+              className="w-full px-3.5 py-2 text-sm sm:text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-600"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 pt-4 border-t border-slate-200">
             <Link
               href="/manufacturing"
-              className="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition"
+              className="w-full sm:w-auto justify-center px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs sm:text-sm hover:bg-slate-50 transition min-h-[44px] flex items-center"
             >
               إلغاء
             </Link>
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 flex items-center gap-2 transition"
+              className="w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-600/20 flex items-center gap-2 transition min-h-[44px]"
             >
               <Save className="h-4 w-4" />
-              <span>فتح أمر التشغيل والبدء</span>
+              <span>فتح أمر التشغيل والانتقال لمساحة العمل</span>
             </button>
           </div>
         </form>

@@ -52,24 +52,58 @@ export default function ExpensesPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">إدارة المصروفات والتكاليف التشغيلية</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900">إدارة المصروفات والتكاليف التشغيلية</h1>
             <p className="text-xs text-slate-500 mt-1">
               تسجيل المصروفات العامة، تكاليف شحن ونقل التصنيع، وفصل المصروفات الرأسمالية عن المصاريف العمومية.
             </p>
           </div>
-          <button className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition shadow-sm flex items-center gap-1.5">
+          <button className="w-full sm:w-auto justify-center px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs sm:text-sm min-h-[44px] transition shadow-sm flex items-center gap-2">
             <Plus className="h-4 w-4" />
             <span>تسجيل مصروف جديد</span>
           </button>
         </div>
 
-        {/* Expenses Table */}
+        {/* Expenses: Mobile Cards (< sm) & Desktop Table (>= sm) */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile Card List */}
+          <div className="sm:hidden divide-y divide-slate-100">
+            {expenses.map((exp) => (
+              <div key={exp.id} className="p-4 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                    {exp.expenseNumber}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    exp.classification === "MANUFACTURING"
+                      ? "bg-purple-50 text-purple-700 border border-purple-200"
+                      : "bg-slate-100 text-slate-700 border border-slate-200"
+                  }`}>
+                    {exp.classificationLabel}
+                  </span>
+                </div>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-xs">{exp.categoryName}</h4>
+                    <p className="text-[11px] text-slate-600 mt-0.5">{exp.description}</p>
+                  </div>
+                  <span className="font-mono font-black text-rose-600 text-sm shrink-0">
+                    -{formatCurrency(exp.amount)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
+                  <span>الخزينة: <strong className="text-slate-700">{exp.cashAccount}</strong></span>
+                  <span className="font-mono">{exp.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-right text-xs">
               <thead className="bg-slate-50 text-slate-500 font-semibold uppercase">
                 <tr>

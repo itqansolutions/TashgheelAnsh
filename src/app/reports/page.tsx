@@ -78,7 +78,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
 
         {/* Tab Selector Pills (Categorized) */}
         <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm print:hidden">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs scrollbar-none">
             {tabs.map((t) => {
               const Icon = t.icon;
               const isActive = tab === t.id;
@@ -86,7 +86,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 <Link
                   key={t.id}
                   href={`/reports?tab=${t.id}`}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${
+                  className={`flex items-center gap-2 px-3.5 py-2 rounded-xl font-bold whitespace-nowrap min-h-[40px] transition-all shrink-0 ${
                     isActive
                       ? "bg-slate-900 text-white shadow-sm"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
@@ -127,38 +127,38 @@ async function InventoryValuationReport({ warehouseId, search }: { warehouseId?:
   const csvRows = rows.map((r) => [r.batchNumber, r.productName, r.productSku, r.warehouseName, r.remainingQuantity, r.unitCost, r.totalValuation, r.daysInStock, r.sourceType]);
 
   return (
-    <div className="space-y-6">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي تقييم المخزون المتبقي</span>
-          <div className="text-2xl font-bold font-mono text-indigo-700">{formatCurrency(summary.totalValuation)}</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">بالتكلفة الفعلية المحددة للباتشات</span>
+    <div className="space-y-4 sm:space-y-6">
+      {/* KPI Cards: 2 cols on mobile */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي تقييم المخزون المتبقي</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-indigo-700">{formatCurrency(summary.totalValuation)}</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">بالتكلفة الفعلية المحددة للباتشات</span>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي الكميات المخزنية</span>
-          <div className="text-2xl font-bold font-mono text-slate-800">{summary.totalQuantity.toLocaleString()} وحدة</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">رصيد متاح للاستخدام أو البيع</span>
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي الكميات المخزنية</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-slate-800">{summary.totalQuantity.toLocaleString()} وحدة</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">رصيد متاح للاستخدام أو البيع</span>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">عدد الباتشات المسجلة</span>
-          <div className="text-2xl font-bold font-mono text-emerald-600">{summary.totalBatches} باتش</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">تتبع تفصيلي فردي لكل تشغيلة</span>
+        <div className="col-span-2 sm:col-span-1 p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">عدد الباتشات المسجلة</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-emerald-600">{summary.totalBatches} باتش</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">تتبع تفصيلي فردي لكل تشغيلة</span>
         </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm print:hidden">
-        <form className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:p-3.5 rounded-2xl border border-slate-200 shadow-sm print:hidden">
+        <form className="flex items-center gap-2 w-full sm:w-auto">
           <input type="hidden" name="tab" value="inventory-valuation" />
           <input
             type="text"
             name="search"
             defaultValue={search || ""}
             placeholder="بحث برقم الباتش أو اسم الصنف..."
-            className="px-3 py-1.5 text-xs rounded-xl border border-slate-300 w-64"
+            className="px-3 py-2 text-sm sm:text-xs rounded-xl border border-slate-300 w-full sm:w-64 min-h-[40px]"
           />
-          <button type="submit" className="px-4 py-1.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800">
+          <button type="submit" className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 min-h-[40px] shrink-0">
             تصفية
           </button>
         </form>
@@ -333,21 +333,21 @@ async function SupplierStatementReport({ partnerId, fromDate, toDate }: { partne
 
       {/* Supplier Summary Cards */}
       {supplier && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs text-slate-500 font-bold block mb-1">الرصيد القائم المستحق للمورد</span>
-            <div className="text-2xl font-bold font-mono text-rose-600">{formatCurrency(netBalance)}</div>
-            <span className="text-[11px] text-slate-400 mt-1 block">التزام دائن مقيد بالدفاتر</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">الرصيد القائم المستحق</span>
+            <div className="text-base sm:text-2xl font-bold font-mono text-rose-600">{formatCurrency(netBalance)}</div>
+            <span className="text-[10px] text-slate-400 mt-0.5 block truncate">التزام دائن مقيد بالدفاتر</span>
           </div>
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي الفواتير الدائنة</span>
-            <div className="text-2xl font-bold font-mono text-slate-800">{formatCurrency(totalCredit)}</div>
-            <span className="text-[11px] text-slate-400 mt-1 block">توريدات مشتريات معتمدة</span>
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي الفواتير الدائنة</span>
+            <div className="text-base sm:text-2xl font-bold font-mono text-slate-800">{formatCurrency(totalCredit)}</div>
+            <span className="text-[10px] text-slate-400 mt-0.5 block truncate">توريدات مشتريات معتمدة</span>
           </div>
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي المدفوعات المسددة</span>
-            <div className="text-2xl font-bold font-mono text-emerald-600">{formatCurrency(totalDebit)}</div>
-            <span className="text-[11px] text-slate-400 mt-1 block">سندات صرف وخزينة</span>
+          <div className="col-span-2 sm:col-span-1 p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي المدفوعات المسددة</span>
+            <div className="text-base sm:text-2xl font-bold font-mono text-emerald-600">{formatCurrency(totalDebit)}</div>
+            <span className="text-[10px] text-slate-400 mt-0.5 block truncate">سندات صرف وخزينة</span>
           </div>
         </div>
       )}
@@ -435,21 +435,21 @@ async function CustomerStatementReport({ partnerId, fromDate, toDate }: { partne
       </form>
 
       {customer && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs text-slate-500 font-bold block mb-1">المديونية القائمة على العميل</span>
-            <div className="text-2xl font-bold font-mono text-indigo-700">{formatCurrency(netBalance)}</div>
-            <span className="text-[11px] text-slate-400 mt-1 block">رصيد مدين مستحق التحصيل</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">المديونية القائمة على العميل</span>
+            <div className="text-base sm:text-2xl font-bold font-mono text-indigo-700">{formatCurrency(netBalance)}</div>
+            <span className="text-[10px] text-slate-400 mt-0.5 block truncate">رصيد مدين مستحق التحصيل</span>
           </div>
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي المبيعات الآجلة</span>
-            <div className="text-2xl font-bold font-mono text-slate-800">{formatCurrency(totalDebit)}</div>
-            <span className="text-[11px] text-slate-400 mt-1 block">فواتير مبيعات صادرة</span>
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي المبيعات الآجلة</span>
+            <div className="text-base sm:text-2xl font-bold font-mono text-slate-800">{formatCurrency(totalDebit)}</div>
+            <span className="text-[10px] text-slate-400 mt-0.5 block truncate">فواتير مبيعات صادرة</span>
           </div>
-          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-            <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي التحصيلات المقبوضة</span>
-            <div className="text-2xl font-bold font-mono text-emerald-600">{formatCurrency(totalCredit)}</div>
-            <span className="text-[11px] text-slate-400 mt-1 block">سندات قبض وخزينة</span>
+          <div className="col-span-2 sm:col-span-1 p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+            <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي التحصيلات المقبوضة</span>
+            <div className="text-base sm:text-2xl font-bold font-mono text-emerald-600">{formatCurrency(totalCredit)}</div>
+            <span className="text-[10px] text-slate-400 mt-0.5 block truncate">سندات قبض وخزينة</span>
           </div>
         </div>
       )}
@@ -506,21 +506,21 @@ async function ManufacturingCostReport() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي تكاليف أوامر التصنيع</span>
-          <div className="text-2xl font-bold font-mono text-indigo-700">{formatCurrency(summary.totalCostAll)}</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">خامات + أتعاب مصانع + مصاريف</span>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي تكاليف أوامر التصنيع</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-indigo-700">{formatCurrency(summary.totalCostAll)}</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">خامات + أتعاب مصانع + مصاريف</span>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي الوحدات تامة الصنع</span>
-          <div className="text-2xl font-bold font-mono text-slate-800">{summary.totalOutputsAll.toLocaleString()} وحدة</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">محولة من خامات إلى منتجات تامة</span>
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي الوحدات تامة الصنع</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-slate-800">{summary.totalOutputsAll.toLocaleString()} وحدة</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">محولة من خامات إلى منتجات تامة</span>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">متوسط تكلفة الوحدة المصنعة</span>
-          <div className="text-2xl font-bold font-mono text-emerald-600">{formatCurrency(summary.avgCostPerUnit)}</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">شامل التكاليف المباشرة وغير المباشرة</span>
+        <div className="col-span-2 sm:col-span-1 p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">متوسط تكلفة الوحدة المصنعة</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-emerald-600">{formatCurrency(summary.avgCostPerUnit)}</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">شامل التكاليف المباشرة</span>
         </div>
       </div>
 
@@ -644,22 +644,22 @@ async function SalesByProductReport({ fromDate, toDate }: { fromDate?: string; t
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي إيراد المبيعات</span>
-          <div className="text-2xl font-bold font-mono text-slate-900">{formatCurrency(summary.totalRevenue)}</div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي إيراد المبيعات</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-slate-900">{formatCurrency(summary.totalRevenue)}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">تكلفة البضاعة المباعة (COGS)</span>
-          <div className="text-2xl font-bold font-mono text-slate-600">{formatCurrency(summary.totalCogs)}</div>
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">التكلفة (COGS)</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-slate-600">{formatCurrency(summary.totalCogs)}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">مجمل الربح التجاري</span>
-          <div className="text-2xl font-bold font-mono text-emerald-600">{formatCurrency(summary.totalGrossProfit)}</div>
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">مجمل الربح التجاري</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-emerald-600">{formatCurrency(summary.totalGrossProfit)}</div>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">متوسط هامش الربح</span>
-          <div className="text-2xl font-bold font-mono text-indigo-700">{summary.overallMargin.toFixed(1)}%</div>
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">متوسط هامش الربح</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-indigo-700">{summary.overallMargin.toFixed(1)}%</div>
         </div>
       </div>
 
@@ -715,21 +715,21 @@ async function GrossProfitReport({ fromDate, toDate }: { fromDate?: string; toDa
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي الأرباح الإجمالية</span>
-          <div className="text-2xl font-bold font-mono text-emerald-600">{formatCurrency(summary.totalProfit)}</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">محسوبة بالباتش الدقيق المستخرج</span>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-4">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي الأرباح الإجمالية</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-emerald-600">{formatCurrency(summary.totalProfit)}</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">محسوبة بالباتش الدقيق</span>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">عدد تخصيصات الباتشات المباعة</span>
-          <div className="text-2xl font-bold font-mono text-slate-800">{summary.totalRows} عملية صرف</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">مطابقة لفواتير المبيعات الصادرة</span>
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">تخصيصات الباتشات المباعة</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-slate-800">{summary.totalRows} عملية صرف</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">مطابقة لفواتير المبيعات</span>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">حالات البيع بأقل من التكلفة</span>
-          <div className="text-2xl font-bold font-mono text-rose-600">{summary.belowCostCount} حالة</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">تتطلب اعتماد إداري معلل</span>
+        <div className="col-span-2 sm:col-span-1 p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">البيع بأقل من التكلفة</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-rose-600">{summary.belowCostCount} حالة</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">تتطلب اعتماد إداري معلل</span>
         </div>
       </div>
 
@@ -804,16 +804,16 @@ async function ReceivablesAgingReport() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي مديونيات العملاء القائمة</span>
-          <div className="text-2xl font-bold font-mono text-indigo-700">{formatCurrency(summary.totalReceivables)}</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">أرصدة مدينة مستحقة</span>
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">إجمالي مديونيات العملاء</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-indigo-700">{formatCurrency(summary.totalReceivables)}</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">أرصدة مدينة مستحقة</span>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-          <span className="text-xs text-slate-500 font-bold block mb-1">إجمالي المديونيات المتأخرة (+30 يوم)</span>
-          <div className="text-2xl font-bold font-mono text-rose-600">{formatCurrency(summary.totalOverdue)}</div>
-          <span className="text-[11px] text-slate-400 mt-1 block">تتطلب متابعة تحصيل عاجلة</span>
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+          <span className="text-[11px] sm:text-xs text-slate-500 font-bold block mb-1">المديونيات المتأخرة (+30)</span>
+          <div className="text-base sm:text-2xl font-bold font-mono text-rose-600">{formatCurrency(summary.totalOverdue)}</div>
+          <span className="text-[10px] text-slate-400 mt-0.5 block truncate">متابعة تحصيل عاجلة</span>
         </div>
       </div>
 

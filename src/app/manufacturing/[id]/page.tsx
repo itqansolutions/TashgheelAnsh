@@ -111,9 +111,9 @@ export default async function ManufacturingWorkspacePage({
 
   return (
     <AppShell>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
           <div>
             <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
               <Link href="/manufacturing" className="hover:text-indigo-600 transition">
@@ -122,7 +122,7 @@ export default async function ManufacturingWorkspacePage({
               <span>/</span>
               <span className="font-mono text-indigo-600 font-bold">{order.orderNumber}</span>
             </div>
-            <h1 className="text-xl font-bold text-slate-900">
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900">
               مساحة تشغيل وتكلفة أمر التصنيع ({order.orderNumber})
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
@@ -130,83 +130,83 @@ export default async function ManufacturingWorkspacePage({
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/manufacturing/${order.id}/print`}
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5"
+              className="px-3 sm:px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs min-h-[44px] shadow-sm transition flex items-center gap-1.5"
             >
               <Printer className="h-4 w-4" />
               <span>إذن التشغيل (A4)</span>
             </Link>
             <Link
               href="/manufacturing"
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition flex items-center gap-1.5"
+              className="px-3 sm:px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs min-h-[44px] transition flex items-center gap-1.5"
             >
               <ArrowRight className="h-4 w-4" />
-              <span>العودة للأوامر</span>
+              <span>العودة</span>
             </Link>
             {isClosed ? (
-              <span className="px-3.5 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1.5 border border-emerald-300">
+              <span className="px-3 py-2 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1.5 border border-emerald-300 min-h-[44px]">
                 <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                <span>أمر تشغيل مغلق ومحمل بالمخزن</span>
+                <span>مغلق ومحمل بالمخزن</span>
               </span>
             ) : (
-              <span className="px-3.5 py-2 rounded-xl bg-blue-50 text-blue-700 font-bold text-xs flex items-center gap-1.5 border border-blue-200">
+              <span className="px-3 py-2 rounded-xl bg-blue-50 text-blue-700 font-bold text-xs flex items-center gap-1.5 border border-blue-200 min-h-[44px]">
                 <Clock className="h-4 w-4 text-blue-600" />
-                <span>أمر تشغيل مفتوح قيد تجميع التكاليف</span>
+                <span>مفتوح للتشغيل</span>
               </span>
             )}
           </div>
         </div>
 
         {/* Live Cost Accumulation Bar */}
-        <div className="p-6 rounded-3xl bg-slate-900 text-white shadow-xl space-y-4">
+        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-900 text-white shadow-xl space-y-3 sm:space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
             <div>
-              <span className="text-xs text-indigo-400 font-bold block mb-1">
+              <span className="text-xs text-indigo-400 font-bold block mb-0.5">
                 التكلفة التراكمية الإجمالية لأمر التشغيل
               </span>
-              <div className="text-3xl font-black font-mono tracking-tight text-white">
+              <div className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-white">
                 {formatCurrency(order.totalManufacturingCost)}
               </div>
             </div>
-            <div className="text-left">
-              <span className="text-xs text-slate-400">حالة التجميع</span>
+            <div className="text-right sm:text-left">
+              <span className="text-[11px] text-slate-400">حالة التجميع</span>
               <p className="text-xs text-emerald-400 font-semibold mt-0.5">
                 {isClosed ? "تم قفل التكلفة ورسملتها على اللوتات" : "مفتوح لإضافة خامات ومصروفات"}
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
-            <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60">
-              <span className="text-slate-400 block text-[11px]">1. تكلفة الخامات المستهلكة (Materials)</span>
-              <span className="text-lg font-bold text-white mt-1 block">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 text-xs font-mono">
+            <div className="p-3 rounded-xl sm:rounded-2xl bg-slate-800/80 border border-slate-700/60">
+              <span className="text-slate-400 block text-[11px] font-sans">1. تكلفة الخامات (Materials)</span>
+              <span className="text-base sm:text-lg font-bold text-white mt-1 block">
                 {formatCurrency(order.totalMaterialCost)}
               </span>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60">
-              <span className="text-slate-400 block text-[11px]">2. أتعاب المصنع المستحقة (Factory Charges)</span>
-              <span className="text-lg font-bold text-amber-400 mt-1 block">
+            <div className="p-3 rounded-xl sm:rounded-2xl bg-slate-800/80 border border-slate-700/60">
+              <span className="text-slate-400 block text-[11px] font-sans">2. أتعاب المصنع (Factory Fees)</span>
+              <span className="text-base sm:text-lg font-bold text-amber-400 mt-1 block">
                 {formatCurrency(order.totalFactoryCost)}
               </span>
             </div>
 
-            <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60">
-              <span className="text-slate-400 block text-[11px]">3. مصاريف تشغيل عامة (General Expenses)</span>
-              <span className="text-lg font-bold text-sky-400 mt-1 block">
+            <div className="p-3 rounded-xl sm:rounded-2xl bg-slate-800/80 border border-slate-700/60">
+              <span className="text-slate-400 block text-[11px] font-sans">3. مصاريف تشغيل (Expenses)</span>
+              <span className="text-base sm:text-lg font-bold text-sky-400 mt-1 block">
                 {formatCurrency(order.totalExpenseCost)}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex items-center gap-2 border-b border-slate-200">
+        {/* Tab Navigation (Horizontally scrollable on mobile) */}
+        <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto whitespace-nowrap scrollbar-none pb-0.5">
           <Link
             href={`/manufacturing/${id}?tab=inputs`}
-            className={`pb-3 px-4 text-xs font-bold border-b-2 transition ${
+            className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition min-h-[44px] flex items-center shrink-0 ${
               tab === "inputs"
                 ? "border-indigo-600 text-indigo-600"
                 : "border-transparent text-slate-500 hover:text-slate-900"
@@ -216,7 +216,7 @@ export default async function ManufacturingWorkspacePage({
           </Link>
           <Link
             href={`/manufacturing/${id}?tab=expenses`}
-            className={`pb-3 px-4 text-xs font-bold border-b-2 transition ${
+            className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition min-h-[44px] flex items-center shrink-0 ${
               tab === "expenses"
                 ? "border-indigo-600 text-indigo-600"
                 : "border-transparent text-slate-500 hover:text-slate-900"
@@ -226,7 +226,7 @@ export default async function ManufacturingWorkspacePage({
           </Link>
           <Link
             href={`/manufacturing/${id}?tab=outputs`}
-            className={`pb-3 px-4 text-xs font-bold border-b-2 transition ${
+            className={`pb-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition min-h-[44px] flex items-center shrink-0 ${
               tab === "outputs"
                 ? "border-indigo-600 text-indigo-600"
                 : "border-transparent text-slate-500 hover:text-slate-900"
@@ -238,15 +238,15 @@ export default async function ManufacturingWorkspacePage({
 
         {/* Tab 1: Inputs */}
         {tab === "inputs" && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {!isClosed && (
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm space-y-4">
                 <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-2.5 flex items-center gap-2">
                   <Package className="h-4 w-4 text-indigo-600" />
                   <span>صرف واستهلاك خامة من المخزن لأمر التشغيل</span>
                 </h3>
 
-                <form action={handleAddInput} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <form action={handleAddInput} className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
                       اختر لوت الباتش المراد سحبه *
@@ -254,7 +254,7 @@ export default async function ManufacturingWorkspacePage({
                     <select
                       name="batchId"
                       required
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white font-semibold"
+                      className="w-full px-3 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 bg-white font-semibold min-h-[44px]"
                     >
                       {availableBatches.map((b) => (
                         <option key={b.id} value={b.id}>
@@ -275,33 +275,61 @@ export default async function ManufacturingWorkspacePage({
                       required
                       name="quantity"
                       placeholder="مثال: 50"
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono font-bold text-slate-900"
+                      className="w-full px-3 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 font-mono font-bold text-slate-900 min-h-[44px]"
                     />
                   </div>
 
                   <div className="flex items-end">
                     <button
                       type="submit"
-                      className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5 transition"
+                      className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5 transition min-h-[44px]"
                     >
                       <Plus className="h-4 w-4" />
-                      <span>صرف الخامة وخفض المخزن فوراً</span>
+                      <span>صرف الخامة وخفض المخزن</span>
                     </button>
                   </div>
                 </form>
               </div>
             )}
 
-            {/* Inputs Table */}
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            {/* Inputs: Mobile Cards (< sm) & Desktop Table (>= sm) */}
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between">
                 <h3 className="text-sm font-bold text-slate-900">سجل الخامات المستهلكة في هذا الأمر</h3>
                 <span className="text-xs text-slate-500 font-bold font-mono">
-                  إجمالي تكلفة الخامات: {formatCurrency(order.totalMaterialCost)}
+                  الإجمالي: {formatCurrency(order.totalMaterialCost)}
                 </span>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* Mobile Card List (< sm) */}
+              <div className="sm:hidden divide-y divide-slate-100">
+                {order.inputs.length === 0 ? (
+                  <div className="p-8 text-center text-slate-400 text-xs">
+                    لم يتم صرف أي خامات لهذا الأمر بعد
+                  </div>
+                ) : (
+                  order.inputs.map((inItem) => (
+                    <div key={inItem.id} className="p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                          {inItem.batchNumber}
+                        </span>
+                        <span className="font-mono font-bold text-slate-900 text-xs">
+                          {formatCurrency(inItem.totalCost)}
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-slate-900 text-xs">{inItem.productName}</h4>
+                      <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 font-mono">
+                        <span>الكمية المسحوبة: <strong className="text-slate-800">{inItem.quantity}</strong></span>
+                        <span>تكلفة الوحدة: <strong>{formatCurrency(inItem.unitCost)}</strong></span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View (>= sm) */}
+              <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-right text-xs">
                   <thead className="bg-slate-50 text-slate-500 font-semibold uppercase">
                     <tr>
@@ -335,22 +363,22 @@ export default async function ManufacturingWorkspacePage({
 
         {/* Tab 2: Expenses & Factory Charges */}
         {tab === "expenses" && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {!isClosed && (
-              <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+              <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm space-y-4">
                 <h3 className="text-sm font-bold text-slate-800 border-b border-slate-100 pb-2.5 flex items-center gap-2">
                   <Receipt className="h-4 w-4 text-emerald-600" />
                   <span>إضافة أتعاب تصنيع للمصنع أو مصروف تشغيل</span>
                 </h3>
 
-                <form action={handleAddExpense} className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <form action={handleAddExpense} className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
                       نوع التكلفة *
                     </label>
                     <select
                       name="expenseType"
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white font-semibold"
+                      className="w-full px-3 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 bg-white font-semibold min-h-[44px]"
                     >
                       <option value="FACTORY_PAYABLE">أتعاب تشغيل (مستحق للمصنع)</option>
                       <option value="GENERAL_OPERATIONAL">مصروف عام (نقل / تغليف)</option>
@@ -365,7 +393,7 @@ export default async function ManufacturingWorkspacePage({
                       type="text"
                       name="category"
                       defaultValue="خدمات تشغيل وتصنيع"
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300"
+                      className="w-full px-3 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 min-h-[44px]"
                     />
                   </div>
 
@@ -379,14 +407,14 @@ export default async function ManufacturingWorkspacePage({
                       required
                       name="amount"
                       placeholder="0.00"
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono font-bold text-slate-900"
+                      className="w-full px-3 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 font-mono font-bold text-slate-900 min-h-[44px]"
                     />
                   </div>
 
                   <div className="flex items-end">
                     <button
                       type="submit"
-                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition"
+                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5 transition min-h-[44px]"
                     >
                       <Plus className="h-4 w-4" />
                       <span>إثبات المصروف على الأمر</span>
@@ -402,23 +430,54 @@ export default async function ManufacturingWorkspacePage({
                       name="description"
                       required
                       placeholder="مثال: أتعاب ثني وتشكيل الصاج بمصنع الأمل"
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300"
+                      className="w-full px-3 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 min-h-[44px]"
                     />
                   </div>
                 </form>
               </div>
             )}
 
-            {/* Expenses Table */}
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            {/* Expenses: Mobile Cards (< sm) & Desktop Table (>= sm) */}
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between">
                 <h3 className="text-sm font-bold text-slate-900">سجل المصروفات وأتعاب التشغيل المقيدة</h3>
                 <span className="text-xs text-slate-500 font-mono font-bold">
-                  إجمالي المصروفات: {formatCurrency(order.totalExpenseCost + order.totalFactoryCost)}
+                  الإجمالي: {formatCurrency(order.totalExpenseCost + order.totalFactoryCost)}
                 </span>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* Mobile Card List (< sm) */}
+              <div className="sm:hidden divide-y divide-slate-100">
+                {order.expenses.length === 0 ? (
+                  <div className="p-8 text-center text-slate-400 text-xs">
+                    لم يتم قيد أي مصروفات لهذا الأمر بعد
+                  </div>
+                ) : (
+                  order.expenses.map((exp) => (
+                    <div key={exp.id} className="p-4 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            exp.expenseType === "FACTORY_PAYABLE"
+                              ? "bg-amber-50 text-amber-700 border border-amber-200"
+                              : "bg-sky-50 text-sky-700 border border-sky-200"
+                          }`}
+                        >
+                          {exp.expenseType === "FACTORY_PAYABLE" ? "أتعاب مصنع دائنة" : "مصروف تشغيلي"}
+                        </span>
+                        <span className="font-mono font-bold text-slate-900 text-xs">
+                          {formatCurrency(exp.amount)}
+                        </span>
+                      </div>
+                      <p className="font-bold text-slate-900 text-xs">{exp.categoryName}</p>
+                      <p className="text-[11px] text-slate-600">{exp.description}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View (>= sm) */}
+              <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-right text-xs">
                   <thead className="bg-slate-50 text-slate-500 font-semibold uppercase">
                     <tr>
@@ -458,9 +517,9 @@ export default async function ManufacturingWorkspacePage({
 
         {/* Tab 3: Outputs & Cost Allocation Wizard */}
         {tab === "outputs" && (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {!isClosed ? (
-              <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+              <div className="bg-white p-4 sm:p-8 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm space-y-4 sm:space-y-6">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                     <Calculator className="h-5 w-5 text-indigo-600" />
@@ -472,13 +531,13 @@ export default async function ManufacturingWorkspacePage({
                   </p>
                 </div>
 
-                <form action={handleCloseOrder} className="space-y-5">
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <form action={handleCloseOrder} className="space-y-4 sm:space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 border border-slate-200">
                     <div className="sm:col-span-2">
                       <label className="block text-xs font-bold text-slate-700 mb-1">
                         المنتج المخرج الأول *
                       </label>
-                      <select name="prod1_id" className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 bg-white font-semibold">
+                      <select name="prod1_id" className="w-full px-3 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 bg-white font-semibold min-h-[44px]">
                         {products.map((p) => (
                           <option key={p.id} value={p.id}>
                             {p.nameAr} ({p.sku})
@@ -498,7 +557,7 @@ export default async function ManufacturingWorkspacePage({
                         name="prod1_qty"
                         placeholder="100"
                         defaultValue="120"
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono font-bold text-slate-900"
+                        className="w-full px-3 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 font-mono font-bold text-slate-900 min-h-[44px]"
                       />
                     </div>
 
@@ -513,18 +572,18 @@ export default async function ManufacturingWorkspacePage({
                         name="prod1_pct"
                         placeholder="100"
                         defaultValue="100"
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 font-mono font-bold text-indigo-700"
+                        className="w-full px-3 py-2.5 text-sm sm:text-xs rounded-xl border border-slate-300 font-mono font-bold text-indigo-700 min-h-[44px]"
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-slate-200">
                     <div className="text-xs text-slate-500 font-medium">
                       ✔ يجب أن يتساوى مجموع نسب التوزيع مع 100.00% بالضبط.
                     </div>
                     <button
                       type="submit"
-                      className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center gap-2 transition"
+                      className="w-full sm:w-auto justify-center px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/20 flex items-center gap-2 transition min-h-[44px]"
                     >
                       <CheckCircle2 className="h-4 w-4" />
                       <span>اعتماد الإقفال ورسملة اللوتات بالمخزن</span>
@@ -534,19 +593,61 @@ export default async function ManufacturingWorkspacePage({
               </div>
             ) : null}
 
-            {/* Produced Batches Table */}
-            <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            {/* Produced Batches: Mobile Cards (< sm) & Desktop Table (>= sm) */}
+            <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-100 flex items-center justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">لوتات المنتجات المخرجة وتكلفتها المحتسبة</h3>
-                  <p className="text-xs text-slate-500">تم إيداعها بالمستودع والحصول على رقم لوت خاص لكل كمية</p>
+                  <p className="text-[11px] text-slate-500">تم إيداعها بالمستودع والحصول على رقم لوت خاص لكل كمية</p>
                 </div>
                 <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
                   {order.outputs.length} مخرجات
                 </span>
               </div>
 
-              <div className="overflow-x-auto">
+              {/* Mobile Card List (< sm) */}
+              <div className="sm:hidden divide-y divide-slate-100">
+                {order.outputs.length === 0 ? (
+                  <div className="p-8 text-center text-slate-400 text-xs">
+                    لم يتم إقفال هذا الأمر وتوليد مخرجات بعد
+                  </div>
+                ) : (
+                  order.outputs.map((out) => (
+                    <div key={out.id} className="p-4 space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                          {out.batchNumber}
+                        </span>
+                        <Link
+                          href={`/inventory/batches/${out.batchNumber}`}
+                          className="inline-flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-semibold"
+                        >
+                          <span>شجرة التتبع</span>
+                          <ChevronLeft className="h-3.5 w-3.5" />
+                        </Link>
+                      </div>
+                      <h4 className="font-bold text-slate-900 text-xs">{out.productName}</h4>
+                      <div className="grid grid-cols-3 gap-1 bg-slate-50 p-2 rounded-xl text-center font-mono text-xs border border-slate-100">
+                        <div>
+                          <span className="text-[10px] text-slate-400 block font-sans">الكمية</span>
+                          <span className="font-bold text-slate-800">{out.quantity}</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block font-sans">نسبة التكلفة</span>
+                          <span className="font-bold text-indigo-700">{out.allocationPercentage}%</span>
+                        </div>
+                        <div>
+                          <span className="text-[10px] text-slate-400 block font-sans">تكلفة الوحدة</span>
+                          <span className="font-black text-emerald-600">{formatCurrency(out.calculatedUnitCost)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Desktop Table View (>= sm) */}
+              <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-right text-xs">
                   <thead className="bg-slate-50 text-slate-500 font-semibold uppercase">
                     <tr>

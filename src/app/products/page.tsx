@@ -43,22 +43,22 @@ export default async function ProductsPage({
               إدارة الخامات الأولية، المنتجات نصف المصنعة، والمنتجات تامة الصنع مع سياسات التسعير بالباتش.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href="/products/categories"
-              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition"
+              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs min-h-[44px] flex items-center transition"
             >
               التصنيفات
             </Link>
             <Link
               href="/products/units"
-              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition"
+              className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs min-h-[44px] flex items-center transition"
             >
               وحدات القياس
             </Link>
             <Link
               href="/products/new"
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition shadow-sm flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs min-h-[44px] flex items-center gap-1.5 transition shadow-sm"
             >
               <Plus className="h-4 w-4" />
               <span>إضافة صنف جديد</span>
@@ -117,7 +117,78 @@ export default async function ProductsPage({
 
         {/* Products Table */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile Card List (sm:hidden) */}
+          <div className="sm:hidden divide-y divide-slate-100">
+            {products.length === 0 ? (
+              <div className="py-12 px-4 text-center text-slate-400">
+                <Package className="h-10 w-10 mx-auto text-slate-300 mb-2" />
+                <p className="font-bold text-slate-600 text-sm">لا توجد أصناف مطابقة للبحث</p>
+                <Link
+                  href="/products/new"
+                  className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs shadow-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>إضافة صنف جديد</span>
+                </Link>
+              </div>
+            ) : (
+              products.map((prod) => {
+                const badge = itemTypeBadges[prod.itemType] || itemTypeBadges.OTHER;
+                return (
+                  <div key={prod.id} className="p-3.5 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono font-bold text-xs text-indigo-600">{prod.sku}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge.color}`}>
+                        {badge.label}
+                      </span>
+                    </div>
+
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">{prod.nameAr}</p>
+                      <p className="text-[11px] text-slate-400 font-sans">{prod.name}</p>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-100 text-[11px]">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">الرصيد المتاح</span>
+                        <span className={`font-bold font-mono ${prod.currentStock > 0 ? "text-emerald-700" : "text-slate-400"}`}>
+                          {formatQuantity(prod.currentStock, prod.uomSymbol)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">سعر البيع</span>
+                        <span className="font-bold font-mono text-slate-800">
+                          {formatCurrency(prod.defaultSellingPrice)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">قيمة المخزون</span>
+                        <span className="font-bold font-mono text-indigo-700">
+                          {formatCurrency(prod.totalInventoryValue)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[11px] text-slate-500 font-medium">
+                        {prod.categoryName} • {prod.batchesCount} لوت
+                      </span>
+                      <Link
+                        href={`/products/${prod.id}`}
+                        className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center gap-1 transition"
+                      >
+                        <span>التفاصيل واللوتات</span>
+                        <ChevronLeft className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Desktop Table (hidden sm:block) */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-right text-xs">
               <thead className="bg-slate-50 text-slate-500 font-semibold uppercase">
                 <tr>

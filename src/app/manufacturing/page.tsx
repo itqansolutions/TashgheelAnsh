@@ -29,27 +29,88 @@ export default async function ManufacturingPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Top Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">أوامر وتشغيلات التصنيع لدى الغير</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-900">أوامر وتشغيلات التصنيع لدى الغير</h1>
             <p className="text-xs text-slate-500 mt-1">
               إدارة أوامر التشغيل، تتبع استهلاك الخامات، قيد أتعاب المصانع، وإقفال العمليات بتوزيع التكاليف.
             </p>
           </div>
           <Link
             href="/manufacturing/new"
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition shadow-sm flex items-center gap-1.5"
+            className="w-full sm:w-auto justify-center px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs sm:text-sm min-h-[44px] transition shadow-sm flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
             <span>أمر تشغيل جديد</span>
           </Link>
         </div>
 
-        {/* Manufacturing Orders Table */}
+        {/* Manufacturing Orders: Mobile Cards (< sm) & Desktop Table (>= sm) */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile Card List */}
+          <div className="sm:hidden divide-y divide-slate-100">
+            {orders.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 text-xs">
+                لا توجد أوامر تشغيل مسجلة
+              </div>
+            ) : (
+              orders.map((order) => {
+                const badge = statusBadges[order.status] || statusBadges.OPEN;
+                const opExpenses = order.totalExpenseCost + order.totalFactoryCost;
+                return (
+                  <div key={order.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                            {order.orderNumber}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${badge.color}`}>
+                            {badge.label}
+                          </span>
+                        </div>
+                        <h3 className="font-bold text-slate-900 text-sm">{order.factoryName}</h3>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          {order.warehouseName} • <span className="font-mono">{order.startDate}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Cost Breakdown Grid */}
+                    <div className="grid grid-cols-3 gap-1 bg-slate-50 p-2.5 rounded-xl border border-slate-100 font-mono text-center">
+                      <div className="bg-white p-1.5 rounded-lg border border-slate-100">
+                        <span className="text-[10px] text-slate-400 block font-sans">الخامات</span>
+                        <span className="font-bold text-slate-900 text-xs">{formatCurrency(order.totalMaterialCost)}</span>
+                      </div>
+                      <div className="bg-white p-1.5 rounded-lg border border-slate-100">
+                        <span className="text-[10px] text-slate-400 block font-sans">أتعاب ومصاريف</span>
+                        <span className="font-bold text-amber-600 text-xs">{formatCurrency(opExpenses)}</span>
+                      </div>
+                      <div className="bg-white p-1.5 rounded-lg border border-slate-100">
+                        <span className="text-[10px] text-slate-400 block font-sans">إجمالي التكلفة</span>
+                        <span className="font-black text-indigo-700 text-xs">{formatCurrency(order.totalManufacturingCost)}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <Link
+                      href={`/manufacturing/${order.id}`}
+                      className="w-full py-2.5 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center justify-center gap-1.5 transition min-h-[44px]"
+                    >
+                      <Factory className="h-4 w-4" />
+                      <span>إدارة مساحة التشغيل والتكاليف</span>
+                      <ChevronLeft className="h-4 w-4 mr-auto" />
+                    </Link>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-right text-xs">
               <thead className="bg-slate-50 text-slate-500 font-semibold uppercase">
                 <tr>
